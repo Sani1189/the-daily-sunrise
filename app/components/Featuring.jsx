@@ -7,7 +7,6 @@ const Featuring = (news) => {
   const fnews = _.sortBy(news.news, 'published_date').reverse();
   const bnews = fnews.filter(news => news.country === "bangladesh");
   const inews = fnews.filter(news => news.country === "international");
-  console.log(bnews);
 
   const formatDate = (date) => {
     return format(new Date(date), 'dd/MM/yyyy')

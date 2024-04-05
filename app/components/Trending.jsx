@@ -33,7 +33,6 @@ const Trending = (news) => {
     
     const tnews=news.news;
     const swiper = useSwiper();
-    console.log(tnews);
     return (
         <div  className="flex flex-row justify-center border-b-2 pb-2 border-gray-400">
         <div className="w-full md:w-5/6">

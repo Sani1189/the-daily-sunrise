@@ -3,11 +3,13 @@ import Trending from "@/app/components/Trending";
 import { POST, GET } from "./api/news/route";
 import { useEffect, useState } from "react";
 import Featuring from "@/app/components/Featuring";
+import Business from "@/app/components/Business";
 
 export default function Home() {
   const [news, setNews] = useState([]);
   const [treandingNews, setTreandingNews] = useState([]);
   const [featuringNews, setFeaturingNews] = useState([]);
+  const [businessNews, setBusinessNews] = useState([]);
   
   useEffect(() => {
     fetch('api/news')
@@ -17,6 +19,8 @@ export default function Home() {
   useEffect(() => {
     setTreandingNews(news.filter((item) => item.tags.includes('trending')));
     setFeaturingNews(news.filter((item) => item.tags.includes('feature')));
+    setBusinessNews(news.filter((item) => item.category == 'business'));
+
   }, [news]);
 
   return (
@@ -27,6 +31,9 @@ export default function Home() {
       </section>
       <section>
         <Featuring news={featuringNews} />
+      </section>
+      <section >
+        <Business news={businessNews} />
       </section>
     </main>
   );
