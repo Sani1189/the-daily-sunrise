@@ -29,3 +29,16 @@ export async function GET(){
     const news = await News.find();
     return NextResponse.json(news, { status: 200 });
 }
+export const fetchNewsById = async (id) => {
+    try {
+      const response = await fetch(`/api/news/${id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch news item');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching news item:', error);
+      return null;
+    }
+  }
+  

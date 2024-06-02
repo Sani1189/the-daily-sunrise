@@ -3,7 +3,6 @@ import React from 'react'
 import { Navigation, Pagination, Autoplay, A11y } from 'swiper/modules';
 import { GrLinkNext } from "react-icons/gr";
 import Link from 'next/link';
-
 import { useSwiper } from 'swiper/react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { useEffect, useState } from 'react';
