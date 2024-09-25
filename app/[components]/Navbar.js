@@ -2,10 +2,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+
 export default function Navbar() {
   const [NewsDropdown, setNewsDropdown] = useState(false);
   const [SportsDropdown, setSportsDropdown] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]); (false);
 
   useEffect(() => {
     function closeDropdown() {
@@ -15,6 +18,25 @@ export default function Navbar() {
     document.addEventListener("click", closeDropdown);
     return () => document.removeEventListener("click", closeDropdown);
   }, []);
+
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      if (searchQuery.length < 3) {
+        setSearchResults([]);
+      }
+      else {
+        const response = await fetch(`/api/news?searchQuery=${searchQuery}`);
+        const data = await response.json();
+        setSearchResults(data);
+      }
+    };
+
+    fetchSearchResults();
+  }, [searchQuery]);
+  const handleResultClick = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+  };
 
   return (
     <nav className="flex flex-col">
@@ -154,13 +176,53 @@ export default function Navbar() {
             </a>
           </Link>
         </div>
-        <div>
+        <div className="relative">
           <input
-            type="search"
-            className="px-4 py-2 w-48 border rounded"
-            placeholder="Search..."
+            type="text"
+            className="px-4 py-2 text-black w-64 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Search for news..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
+          {searchQuery && (
+            <button
+              className="absolute right-4  text-3xl text-red-500 hover:text-red-800"
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
+            >
+              &times; 
+            </button>
+          )}
+          {searchResults.length > 0 && (
+            <div className="absolute bg-white border border-gray-300 shadow-lg mt-2 w-64 rounded-md z-10">
+              {searchResults.slice(0, 3).map((result) => (
+                <Link
+                  key={result.id}
+                  href={{
+                    pathname: `/${result.category}/${result.title}`,
+                    query: { id: result._id },
+                  }}
+                  legacyBehavior
+                >
+                  <a
+                    className="flex items-center py-3 px-4 hover:bg-blue-50 text-gray-700"
+                    onClick={handleResultClick}
+                  >
+                    <img
+                      src={result.image_url}
+                      alt={result.title}
+                      className="w-12 h-12 object-cover rounded-md mr-3"
+                    />
+                    <span className="font-semibold">{result.title}</span>
+                  </a>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
+
+
+
       </div>
       <div className="md:hidden grid place-content-end mr-3">
         <button onClick={() => setIsMenuOpen(!isMenuOpen)}>

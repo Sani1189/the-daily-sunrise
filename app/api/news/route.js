@@ -26,28 +26,44 @@ export async function POST(req) {
 }
 
 export async function GET(req) {
-    const { searchParams } = new URL(req.url);
-    const category = searchParams.get('category');
-    const tags = searchParams.get('tags'); 
-    const country = searchParams.get('country'); // New parameter for country
+    try {
+        const { searchParams } = new URL(req.url);
+        const category = searchParams.get('category');
+        const tags = searchParams.get('tags');
+        const country = searchParams.get('country');
+        const searchQuery = searchParams.get('searchQuery');
 
-    await connectMongoDB();
+        console.log(searchQuery);
+        
+        await connectMongoDB();
+        
+        let query = {};
+        
+        if (tags) {
+            query.tags = tags;
+        }
+        if (country) {
+            query.country = country;
+        }
+        if (category) {
+            query.category = category;
+        }
+        if (searchQuery) {
+            query.$or = [
+                { title: { $regex: searchQuery, $options: 'i' } },
+                { content: { $regex: searchQuery, $options: 'i' } }
+            ];
+        }
 
-    let news;
+        const news = await News.find(query);
 
-    if (tags) {
-        news = await News.find({ tags });
-    } else if (country) {
-        news = await News.find({ country }); // Fetch news by country
-    } else if (category) {
-        news = await News.find({ category });
-    } else {
-        news = await News.find();
-    }
-
-    if (news.length > 0) {
-        return NextResponse.json(news, { status: 200 });
-    } else {
-        return NextResponse.json({ message: "News not found" }, { status: 404 });
+        if (news.length > 0) {
+            return NextResponse.json(news, { status: 200 });
+        } else {
+            return NextResponse.json({ message: "News not found" }, { status: 404 });
+        }
+    } catch (error) {
+        console.error("Error fetching news:", error);
+        return NextResponse.json({ message: "Error fetching news" }, { status: 500 });
     }
 }

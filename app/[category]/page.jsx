@@ -13,8 +13,6 @@ export default function Page({ params }) {
         const fetchArticles = async () => {
             try {
                 let url;
-
-                // Determine the fetch URL based on the category
                 if (['bangladesh', 'international', 'usa', 'uk', 'canada'].includes(category.toLowerCase())) {
                     url = `/api/news?country=${category}`;
                 } else if (['football', 'cricket'].includes(category.toLowerCase())) {
@@ -25,7 +23,7 @@ export default function Page({ params }) {
 
                 const response = await fetch(url);
                 const data = await response.json();
-                setArticles(data); // Assuming the data is an array of articles
+                setArticles(data);
             } catch (error) {
                 console.error('Error fetching articles:', error);
             }
