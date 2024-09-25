@@ -35,23 +35,25 @@ export default function Navbar() {
   const handleResultClick = () => {
     setSearchQuery("");
     setSearchResults([]);
-    setIsMenuOpen(false); // Close menu on search result click
+    setIsMenuOpen(false);
   };
 
   const handleMenuItemClick = () => {
-    setIsMenuOpen(false); // Close menu on menu item click
+    setIsMenuOpen(false); 
   };
 
   return (
     <nav className="flex flex-col">
       <div className="">
         <div className="w-full md:w-9/12 flex justify-between border-b-2 border-gray-200 items-center bg-white m-auto p-2 sm:p-4">
-          <div className="text-center basis-1/4">
+          {/* Date Section: Hidden on mobile */}
+          <div className="text-center basis-1/4 hidden md:block">
             <p className="text-black font-serif">
               {new Date().toLocaleDateString("default", { weekday: "long" })}{" "}
               {new Date().toLocaleDateString()}{" "}
             </p>
           </div>
+
           <Link href="/" className="text-center p-3">
             <img
               src="/images/logo.png"
@@ -59,7 +61,9 @@ export default function Navbar() {
               className="h-auto sm:h-12 cursor-pointer hover:scale-105 transition-transform duration-200"
             />
           </Link>
-          <div className="text-center basis-1/4">
+
+          {/* Dark Button: Hidden on mobile */}
+          <div className="text-center basis-1/4 hidden md:block">
             <button
               type="button"
               className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
@@ -68,6 +72,7 @@ export default function Navbar() {
             </button>
           </div>
         </div>
+
       </div>
       <div className="hidden md:flex space-x-1 flex justify-center items-center border-b-2 border-gray-400 bg-white p-2 sm:p-4">
         {/* News Dropdown */}
@@ -186,7 +191,7 @@ export default function Navbar() {
               onClick={() => setSearchQuery("")}
               aria-label="Clear search"
             >
-              &times; 
+              &times;
             </button>
           )}
           {searchResults.length > 0 && (
@@ -267,7 +272,7 @@ export default function Navbar() {
                 onClick={() => setSearchQuery("")}
                 aria-label="Clear search"
               >
-                &times; 
+                &times;
               </button>
             )}
             {searchResults.length > 0 && (

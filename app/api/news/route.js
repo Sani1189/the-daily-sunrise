@@ -32,8 +32,6 @@ export async function GET(req) {
         const tags = searchParams.get('tags');
         const country = searchParams.get('country');
         const searchQuery = searchParams.get('searchQuery');
-
-        console.log(searchQuery);
         
         await connectMongoDB();
         
