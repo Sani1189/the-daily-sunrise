@@ -1,20 +1,20 @@
 'use client'
-import Trending from "@/app/components/Trending";
-import { POST, GET } from "./api/news/route";
 import { useEffect, useState } from "react";
-import Featuring from "@/app/components/Featuring";
-import Business from "@/app/components/Business";
-import Lifestyle from "@/app/components/Lifestyle";
-import Entertainment from "@/app/components/Entertainment";
-import Tech from "@/app/components/Tech";
-import Football from "@/app/components/Football";
-import Cricket from "@/app/components/Cricket";
-import Environment from "@/app/components/Environment";
-import Politics from "@/app/components/politics";
-import Health from "@/app/components/Health";
-import Opinion from "@/app/components/Opinion";
+import Trending from "@/app/NewsComponents/Trending";
+import Featuring from "@/app/NewsComponents/Featuring";
+import Business from "@/app/NewsComponents/Business";
+import Lifestyle from "@/app/NewsComponents/Lifestyle";
+import Entertainment from "@/app/NewsComponents/Entertainment";
+import Tech from "@/app/NewsComponents/Tech";
+import Football from "@/app/NewsComponents/Football";
+import Cricket from "@/app/NewsComponents/Cricket";
+import Environment from "@/app/NewsComponents/Environment";
+import Politics from "@/app/NewsComponents/politics";
+import Health from "@/app/NewsComponents/Health";
+import Opinion from "@/app/NewsComponents/Opinion";
 
 export default function Home() {
+
   const [news, setNews] = useState([]);
   const [treandingNews, setTreandingNews] = useState([]);
   const [featuringNews, setFeaturingNews] = useState([]);
@@ -33,6 +33,7 @@ export default function Home() {
       .then(response => response.json())
       .then(data => setNews(data));
   }, []);
+
   useEffect(() => {
     setOpinionNews(news.filter((item) => item.category == 'opinion'));
     setTreandingNews(news.filter((item) => item.tags.includes('trending')));
@@ -46,6 +47,7 @@ export default function Home() {
     setPoliticsNews(news.filter((item) => item.category == 'politics'));
     setHealthNews(news.filter((item) => item.category == 'health'));
   }, [news]);
+
 
   return (
     <div>

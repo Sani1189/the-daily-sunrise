@@ -1,9 +1,10 @@
+// components/Politics.jsx
 import React from 'react';
 import { format } from 'date-fns';
+import Link from 'next/link'; // Import Link from next/link
 
-const politics = (news) => {
-    // Sort news by published date (descending)
-    const sortedNews = news.news.sort((a, b) => new Date(b.published_date) - new Date(a.published_date));
+const Politics = ({ news }) => {
+    const sortedNews = news.sort((a, b) => new Date(b.published_date) - new Date(a.published_date));
 
     return (
         <section className="p-4">
@@ -21,7 +22,12 @@ const politics = (news) => {
                         <div key={index} className="overflow-hidden rounded-lg shadow-lg">
                             <img src={item.image_url} alt={item.title} className="object-cover h-48 w-full" />
                             <div className="p-4">
-                                <h3 className="text-gray-800 font-bold text-xl mb-2">{item.title}</h3>
+                                <Link href={{
+                                    pathname: '/politics/' + item.title, // Update to your desired URL structure
+                                    query: { id: item._id },
+                                }}>
+                                    <h3 className="text-gray-800 font-bold text-xl mb-2 cursor-pointer">{item.title}</h3>
+                                </Link>
                                 <p className="text-gray-600">{format(new Date(item.published_date), 'MMMM dd, yyyy')}</p>
                             </div>
                         </div>
@@ -32,4 +38,4 @@ const politics = (news) => {
     );
 };
 
-export default politics;
+export default Politics;

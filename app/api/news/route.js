@@ -1,4 +1,5 @@
-import connectMongoDB  from "@/libs/DBconnect";
+// api/news/route.jsx
+import connectMongoDB from "@/libs/DBconnect";
 import News from "@/models/news";
 import { NextResponse } from "next/server";
 
@@ -24,21 +25,29 @@ export async function POST(req) {
     }
 }
 
-export async function GET(){
+export async function GET(req) {
+    const { searchParams } = new URL(req.url);
+    const category = searchParams.get('category');
+    const tags = searchParams.get('tags'); 
+    const country = searchParams.get('country'); // New parameter for country
+
     await connectMongoDB();
-    const news = await News.find();
-    return NextResponse.json(news, { status: 200 });
-}
-export const fetchNewsById = async (id) => {
-    try {
-      const response = await fetch(`/api/news/${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch news item');
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching news item:', error);
-      return null;
+
+    let news;
+
+    if (tags) {
+        news = await News.find({ tags });
+    } else if (country) {
+        news = await News.find({ country }); // Fetch news by country
+    } else if (category) {
+        news = await News.find({ category });
+    } else {
+        news = await News.find();
     }
-  }
-  
+
+    if (news.length > 0) {
+        return NextResponse.json(news, { status: 200 });
+    } else {
+        return NextResponse.json({ message: "News not found" }, { status: 404 });
+    }
+}
