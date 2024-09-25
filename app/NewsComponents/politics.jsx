@@ -1,7 +1,7 @@
 // components/Politics.jsx
 import React from 'react';
 import { format } from 'date-fns';
-import Link from 'next/link'; // Import Link from next/link
+import Link from 'next/link';
 
 const Politics = ({ news }) => {
     const sortedNews = news.sort((a, b) => new Date(b.published_date) - new Date(a.published_date));
@@ -23,7 +23,7 @@ const Politics = ({ news }) => {
                             <img src={item.image_url} alt={item.title} className="object-cover h-48 w-full" />
                             <div className="p-4">
                                 <Link href={{
-                                    pathname: '/politics/' + item.title, // Update to your desired URL structure
+                                    pathname: '/politics/' + item.title,
                                     query: { id: item._id },
                                 }}>
                                     <h3 className="text-gray-800 font-bold text-xl mb-2 cursor-pointer">{item.title}</h3>

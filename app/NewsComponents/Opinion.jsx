@@ -1,7 +1,7 @@
 // components/Opinion.jsx
 import React from 'react';
 import _ from 'lodash';
-import Link from 'next/link'; // Import Link from next/link
+import Link from 'next/link';
 
 const Opinion = ({ news }) => {
     console.log(news);
@@ -24,7 +24,7 @@ const Opinion = ({ news }) => {
                                 <p className="text-gray-600 mb-2 m-auto">{item.author}</p>
                                 <h2 className="text-xl italic text-gray-800 text-center m-auto">
                                     <Link href={{
-                                        pathname: '/opinion/' + item.title, // Update to your desired URL structure
+                                        pathname: '/opinion/' + item.title,
                                         query: { id: item._id },
                                     }}>
                                         <span className="text-red-600 text-2xl font-bold pr-1">&#8220;</span>
@@ -44,7 +44,7 @@ const Opinion = ({ news }) => {
                                     <div>
                                         <h3 className="text-lg text-gray-800 italic">
                                             <Link href={{
-                                                pathname: '/opinion/' + item.title, // Update to your desired URL structure
+                                                pathname: '/opinion/' + item.title,
                                                 query: { id: item._id },
                                             }}>
                                                 <span className="pr-1">&#8220;</span>

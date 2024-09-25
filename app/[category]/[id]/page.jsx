@@ -116,7 +116,7 @@ const NewsPage = ({ params, searchParams }) => {
 
     // Create the comment object
     const commentData = {
-      newsId: id,  // Ensure this matches the required field in the schema
+      newsId: id,
       name,
       email,
       comment,

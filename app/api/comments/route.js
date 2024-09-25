@@ -1,5 +1,5 @@
 import connectMongoDB from "@/libs/DBconnect";
-import Comment from "@/models/comment"; // Ensure correct path and import
+import Comment from "@/models/comment";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {

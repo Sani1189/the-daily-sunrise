@@ -2,7 +2,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { format } from 'date-fns';
-import Link from 'next/link'; // Import Link from next/link
+import Link from 'next/link';
 
 const Business = ({ news }) => {
     const allnews = _.sortBy(news, 'published_date').reverse();
@@ -29,7 +29,7 @@ const Business = ({ news }) => {
                             {
                                 inews.slice(0, 2).map((item, index) => (
                                     <Link key={index} href={{
-                                        pathname: '/business/' + item.title, // Update to your desired URL structure
+                                        pathname: '/business/' + item.title,
                                         query: { id: item._id },
                                     }} className="grid grid-rows-1 grid-flow-col gap-2 m-auto">
                                         <div className="row-span-1 border-b-2">
@@ -45,7 +45,7 @@ const Business = ({ news }) => {
                         </div>
 
                         <Link key={0} href={{
-                            pathname: '/business/' + bnews[0].title, // Update to your desired URL structure
+                            pathname: '/business/' + bnews[0].title,
                             query: { id: bnews[0]._id },
                         }} className="row-span-4 flex flex-col border-b-2 p-2">
                             <img className="h-48 w-auto p-auto rounded-lg" src={bnews[0].image_url} alt={bnews[0].title} />
@@ -61,7 +61,7 @@ const Business = ({ news }) => {
                         {
                             inews.slice(2, 6).map((item, index) => (
                                 <Link key={index} href={{
-                                    pathname: '/business/' + item.title, // Update to your desired URL structure
+                                    pathname: '/business/' + item.title,
                                     query: { id: item._id },
                                 }} className="ml-0 lg:ml-2 h-1/4 border-b-2 items-center">
                                     <h1 className="font-medium text-1xl lg:text-2xl">{item.title} </h1>

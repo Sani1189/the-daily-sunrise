@@ -2,7 +2,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { format } from 'date-fns';
-import Link from 'next/link'; // Import Link from next/link
+import Link from 'next/link';
 
 const Featuring = ({ news }) => {
   const fnews = _.sortBy(news, 'published_date').reverse();
@@ -32,7 +32,7 @@ const Featuring = ({ news }) => {
             <div className="grid grid-rows-9 sm:grid-rows-3 grid-flow-col gap-2 sm:gap-4 m-auto">
               <div className="row-span-5 sm:row-span-3 border-b-2">
                 <Link href={{
-                  pathname: '/feature/' + encodeURIComponent(bnews[0].title), // Update to your desired URL structure
+                  pathname: '/feature/' + encodeURIComponent(bnews[0].title),
                   query: { id: bnews[0]._id },
                 }}>
                   <img className="w-full h-auto rounded-lg" src={bnews[0].image_url} alt={bnews[0].title} />

@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function Page({ params }) {
     const category = params.category;
     const [articles, setArticles] = useState([]);
-    const [visibleArticles, setVisibleArticles] = useState(8); // Control number of visible articles
+    const [visibleArticles, setVisibleArticles] = useState(8);
 
     useEffect(() => {
         const fetchArticles = async () => {
@@ -15,7 +15,7 @@ export default function Page({ params }) {
                 let url;
                 if (['bangladesh', 'international', 'usa', 'uk', 'canada'].includes(category.toLowerCase())) {
                     url = `/api/news?country=${category}`;
-                } else if (['football', 'cricket'].includes(category.toLowerCase())) {
+                } else if (['football', 'cricket','trending' ,'feature'].includes(category.toLowerCase())) {
                     url = `/api/news?tags=${category}`;
                 } else {
                     url = `/api/news?category=${category}`;
@@ -32,10 +32,10 @@ export default function Page({ params }) {
         fetchArticles();
     }, [category]);
 
-    const sortedArticles = _.sortBy(articles, 'published_date').reverse(); // Sort articles by published date
+    const sortedArticles = _.sortBy(articles, 'published_date').reverse(); 
 
     const handleShowMore = () => {
-        setVisibleArticles(prev => prev + 8); // Increase the number of visible articles
+        setVisibleArticles(prev => prev + 8);
     };
 
     return (
@@ -54,7 +54,7 @@ export default function Page({ params }) {
                         <Link 
                             key={index} 
                             href={{
-                                pathname: `/${item.category}/${item.title}`, // Dynamic path using category
+                                pathname: `/${item.category}/${item.title}`,
                                 query: { id: item._id },
                             }} 
                             className='flex flex-col border rounded-lg overflow-hidden shadow-md transition-transform transform hover:scale-105'

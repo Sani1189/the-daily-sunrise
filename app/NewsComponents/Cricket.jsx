@@ -2,7 +2,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { format } from 'date-fns';
-import Link from 'next/link'; // Import Link from next/link
+import Link from 'next/link';
 
 const Cricket = ({ news }) => {
     const fnews = _.sortBy(news, 'published_date').reverse();

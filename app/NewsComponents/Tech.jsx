@@ -2,7 +2,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { format } from 'date-fns';
-import Link from 'next/link'; // Import Link from next/link
+import Link from 'next/link';
 
 const Tech = ({ news }) => {
     const tnews = _.sortBy(news, 'published_date').reverse();
@@ -16,7 +16,7 @@ const Tech = ({ news }) => {
             <div className='flex flex-row justify-center w-full mx-auto gap-2 my-2'>
                 {tnews.length > 0 && (
                     <Link href={{
-                        pathname: '/technology/' + tnews[1].title, // Update to your desired URL structure
+                        pathname: '/technology/' + tnews[1].title,
                         query: { id: tnews[1]._id },
                     }} className='flex flex-row border-b-2 border-gray-300 w-full items-center justify-center'>
                         <img src={tnews[1].image_url} alt={tnews[1].title} className='h-auto w-1/2 lg:w-4/6 p-1 rounded-lg' />
@@ -35,7 +35,7 @@ const Tech = ({ news }) => {
                 <div className='grid grid-cols-1 lg:grid-cols-5 bg-gray-100 gap-2 justify-center'>
                     {tnews.slice(1, 6).map((item, index) => (
                         <Link key={index} href={{
-                            pathname: '/tech/' + item.title, // Update to your desired URL structure
+                            pathname: '/tech/' + item.title,
                             query: { id: item._id },
                         }} className='flex flex-col col-span-1 p-1 overflow-hidden rounded-lg hover:bg-gray-200 transition duration-200'>
                             <h1 className='text-black w-full font-bold text-1xl lg:text-lg'>{item.title}</h1>
