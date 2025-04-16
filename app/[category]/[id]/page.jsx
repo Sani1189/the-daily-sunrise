@@ -4,14 +4,19 @@ import Link from "next/link"
 import {
   FaFacebook,
   FaInstagram,
-  FaShareAlt,
   FaUserCircle,
   FaRegUser,
   FaUserAlt,
   FaRegClock,
   FaRegCalendarAlt,
+  FaTag,
+  FaLink,
+  FaRegBookmark,
+  FaBookmark,
+  FaUser,
 } from "react-icons/fa"
 import { FaXTwitter } from "react-icons/fa6"
+import { motion, AnimatePresence } from "framer-motion"
 
 const timeAgo = (date) => {
   const now = new Date()
@@ -51,6 +56,9 @@ const NewsPage = ({ params, searchParams }) => {
   const [formError, setFormError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [showShareTooltip, setShowShareTooltip] = useState(false)
+  const [readingProgress, setReadingProgress] = useState(0)
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -89,9 +97,46 @@ const NewsPage = ({ params, searchParams }) => {
       }
     }
 
+    // Check if article is bookmarked
+    const checkBookmark = () => {
+      const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]")
+      setIsBookmarked(bookmarks.includes(id))
+    }
+
+    // Reading progress
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight
+      const documentHeight = document.documentElement.scrollHeight
+      const scrollTop = window.scrollY
+      const progress = (scrollTop / (documentHeight - windowHeight)) * 100
+      setReadingProgress(Math.min(progress, 100))
+    }
+
     fetchNews()
     fetchComments()
+    checkBookmark()
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [category, id])
+
+  const toggleBookmark = () => {
+    const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]")
+    if (isBookmarked) {
+      const newBookmarks = bookmarks.filter((bookmarkId) => bookmarkId !== id)
+      localStorage.setItem("bookmarks", JSON.stringify(newBookmarks))
+    } else {
+      bookmarks.push(id)
+      localStorage.setItem("bookmarks", JSON.stringify(bookmarks))
+    }
+    setIsBookmarked(!isBookmarked)
+  }
+
+  const copyLinkToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href)
+    setShowShareTooltip(true)
+    setTimeout(() => setShowShareTooltip(false), 2000)
+  }
 
   if (loading) {
     return (
@@ -108,10 +153,7 @@ const NewsPage = ({ params, searchParams }) => {
         <div className="text-red-500 text-5xl mb-4">⚠️</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Error Loading Content</h2>
         <p className="text-gray-600 mb-6">{error}</p>
-        <Link
-          href="/"
-          className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-300"
-        >
+        <Link href="/" className="fancy-button">
           Return to Homepage
         </Link>
       </div>
@@ -189,38 +231,76 @@ const NewsPage = ({ params, searchParams }) => {
     return string.charAt(0).toUpperCase() + string.slice(1)
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15,
+      },
+    },
+  }
+
   return (
     <div className="container mx-auto p-4 bg-gray-50">
-      <div className="flex flex-col md:flex-row gap-6">
-        <div className="md:w-2/3">
+      {/* Reading progress bar */}
+      <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
+        <div
+          className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+          style={{ width: `${readingProgress}%` }}
+        ></div>
+      </div>
+
+      <motion.div
+        className="flex flex-col md:flex-row gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div className="md:w-2/3" variants={itemVariants}>
           {/* Country and Category */}
           <div className="flex justify-start ml-1 mb-4">
             <Link
               href={`/${mainNews.country}`}
-              className="text-2xl text-gray-700 font-bold hover:text-blue-700 transition-colors duration-300"
+              className="text-2xl text-gray-700 font-bold hover:text-blue-700 transition-colors duration-300 fancy-underline"
             >
               {toUpperCaseFirst(mainNews.country)}
             </Link>
             <p className="text-xl text-gray-800 font-bold px-2">|</p>
             <Link
               href={`/${category}`}
-              className="text-2xl text-gray-700 font-bold hover:text-blue-700 transition-colors duration-300"
+              className="text-2xl text-gray-700 font-bold hover:text-blue-700 transition-colors duration-300 fancy-underline"
             >
               {toUpperCaseFirst(category)}
             </Link>
           </div>
           {mainNews && (
-            <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg relative fade-in">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800 leading-tight">{mainNews.title}</h1>
+            <motion.div className="fancy-card p-6 md:p-8 bg-white relative" variants={itemVariants}>
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800 leading-tight gradient-text">
+                {mainNews.title}
+              </h1>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white mr-3 shadow-md">
                     {mainNews.author.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <p className="font-medium text-gray-800">{mainNews.author}</p>
                     <div className="flex items-center text-sm text-gray-500">
-                      <FaRegCalendarAlt className="mr-1" />
+                      <FaRegCalendarAlt className="mr-1 text-blue-500" />
                       <time dateTime={mainNews.published_date}>
                         {new Date(mainNews.published_date).toLocaleDateString("en-US", {
                           year: "numeric",
@@ -232,13 +312,25 @@ const NewsPage = ({ params, searchParams }) => {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <a
-                    href={`mailto:?subject=${mainNews.title}&body=${encodeURIComponent(window.location.href)}`}
-                    className="p-2 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors duration-300"
-                    aria-label="Share via email"
+                  <button
+                    onClick={copyLinkToClipboard}
+                    className="p-2 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors duration-300 relative"
+                    aria-label="Copy link"
                   >
-                    <FaShareAlt size={20} />
-                  </a>
+                    <FaLink size={20} />
+                    <AnimatePresence>
+                      {showShareTooltip && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap"
+                        >
+                          Link copied!
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </button>
                   <a
                     href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
                     className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors duration-300"
@@ -266,6 +358,15 @@ const NewsPage = ({ params, searchParams }) => {
                   >
                     <FaInstagram size={20} />
                   </a>
+                  <button
+                    onClick={toggleBookmark}
+                    className={`p-2 rounded-full transition-colors duration-300 ${
+                      isBookmarked ? "bg-yellow-100 text-yellow-600" : "bg-gray-100 text-gray-600"
+                    }`}
+                    aria-label={isBookmarked ? "Remove bookmark" : "Bookmark article"}
+                  >
+                    {isBookmarked ? <FaBookmark size={20} /> : <FaRegBookmark size={20} />}
+                  </button>
                 </div>
               </div>
               <div className="relative overflow-hidden rounded-xl mb-6 shadow-md">
@@ -278,15 +379,17 @@ const NewsPage = ({ params, searchParams }) => {
               </div>
               <div className="flex flex-wrap gap-2 mb-6">
                 {mainNews.tags.map((tag, index) => (
-                  <span key={index} className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                    #{tag}
-                  </span>
+                  <Link href={`/tag/${tag}`} key={index}>
+                    <span className="tag-pill">
+                      <FaTag className="mr-1" /> {tag}
+                    </span>
+                  </Link>
                 ))}
               </div>
               <div className="text-lg text-gray-700 leading-relaxed space-y-6 whitespace-pre-line">
                 <p>{firstPart}</p>
                 {/* Advertisement */}
-                <div className="bg-gradient-to-r from-gray-100 to-gray-200 p-6 my-8 rounded-lg shadow-md">
+                <div className="bg-gradient-to-r from-gray-100 to-gray-200 p-6 my-8 rounded-lg shadow-md shine-effect">
                   <h2 className="text-2xl font-bold mb-4 text-gray-800">Advertisement</h2>
                   <div className="flex justify-center items-center h-32 bg-white rounded-lg border border-gray-300 shadow-inner">
                     <span className="text-gray-500">Ad space</span>
@@ -294,7 +397,7 @@ const NewsPage = ({ params, searchParams }) => {
                 </div>
                 <p>{secondPart}</p>
                 {/* Advertisement */}
-                <div className="bg-gradient-to-r from-gray-100 to-gray-200 p-6 my-8 rounded-lg shadow-md">
+                <div className="bg-gradient-to-r from-gray-100 to-gray-200 p-6 my-8 rounded-lg shadow-md shine-effect">
                   <h2 className="text-2xl font-bold mb-4 text-gray-800">Advertisement</h2>
                   <div className="flex justify-center items-center h-32 bg-white rounded-lg border border-gray-300 shadow-inner">
                     <span className="text-gray-500">Ad space</span>
@@ -302,14 +405,17 @@ const NewsPage = ({ params, searchParams }) => {
                 </div>
                 <p>{thirdPart}</p>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Comments Section */}
-          <div className="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-8 mt-8 rounded-xl shadow-xl">
-            <h2 className="text-3xl font-extrabold text-gray-800 mb-6 border-b-2 pb-2 border-blue-500 relative">
+          <motion.div
+            className="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-8 mt-8 rounded-xl shadow-xl"
+            variants={itemVariants}
+          >
+            <h2 className="text-3xl font-extrabold text-gray-800 mb-6 border-b-2 pb-2 border-blue-500 relative gradient-text">
               Latest Comments
-              <span className="absolute top-0 right-0 bg-blue-600 text-white text-sm px-2 py-1 rounded-full">
+              <span className="absolute top-0 right-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm px-2 py-1 rounded-full">
                 {comments.length}
               </span>
             </h2>
@@ -317,10 +423,7 @@ const NewsPage = ({ params, searchParams }) => {
               <div className="text-center py-8">
                 <p className="text-gray-600 italic mb-4">No comments yet. Be the first to share your thoughts!</p>
                 <div className="mt-4">
-                  <a
-                    href="#comment-form"
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-300"
-                  >
+                  <a href="#comment-form" className="inline-flex items-center px-4 py-2 fancy-button">
                     Add a Comment
                   </a>
                 </div>
@@ -328,9 +431,12 @@ const NewsPage = ({ params, searchParams }) => {
             ) : (
               <div className="space-y-6">
                 {comments.map((comment, index) => (
-                  <div
+                  <motion.div
                     key={index}
-                    className={`flex items-start space-x-4 py-6 ${index < 3 ? "bg-gradient-to-r from-blue-50 to-white" : "bg-white"} rounded-lg shadow-md px-6 mb-4 transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1`}
+                    className={`flex items-start space-x-4 py-6 ${index < 3 ? "bg-gradient-to-r from-blue-50 to-white" : "bg-white"} rounded-lg shadow-md px-6 mb-4 transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 fancy-card`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
                   >
                     {/* Random icons for the latest three comments */}
                     {index === 0 && <FaUserCircle className="w-10 h-10 text-blue-600" />}
@@ -340,7 +446,7 @@ const NewsPage = ({ params, searchParams }) => {
 
                     <div className="flex-1">
                       <div className="flex justify-between items-center mb-2">
-                        <p className="font-semibold text-indigo-600 text-lg">{comment.name}</p>
+                        <p className="font-semibold gradient-text text-lg">{comment.name}</p>
                         <p className="text-sm text-gray-500 flex items-center">
                           <FaRegClock className="mr-1" />
                           {timeAgo(comment.date)}
@@ -348,17 +454,17 @@ const NewsPage = ({ params, searchParams }) => {
                       </div>
                       <p className="text-gray-700 mt-2 text-md leading-relaxed">{comment.comment}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}
-          </div>
+          </motion.div>
 
           {/* Comment Form */}
-          <div id="comment-form" className="bg-white p-8 mt-8 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800 relative inline-block">
+          <motion.div id="comment-form" className="fancy-card p-8 mt-8 bg-white" variants={itemVariants}>
+            <h2 className="text-2xl font-bold mb-6 text-gray-800 relative inline-block gradient-text">
               Leave a Comment
-              <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-blue-600 rounded"></span>
+              <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></span>
             </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -406,19 +512,31 @@ const NewsPage = ({ params, searchParams }) => {
               </div>
 
               {formError && (
-                <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">{formError}</div>
+                <motion.div
+                  className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  {formError}
+                </motion.div>
               )}
 
               {successMessage && (
-                <div className="p-4 bg-green-50 text-green-700 rounded-lg border border-green-200">
+                <motion.div
+                  className="p-4 bg-green-50 text-green-700 rounded-lg border border-green-200"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
                   {successMessage}
-                </div>
+                </motion.div>
               )}
 
-              <button
+              <motion.button
                 type="submit"
                 disabled={isSubmitting}
-                className={`px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-1 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
+                className={`fancy-button ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {isSubmitting ? (
                   <span className="flex items-center">
@@ -447,37 +565,43 @@ const NewsPage = ({ params, searchParams }) => {
                 ) : (
                   "Submit Comment"
                 )}
-              </button>
+              </motion.button>
             </form>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Other news section */}
-        <div className="md:w-1/3">
+        <motion.div className="md:w-1/3" variants={itemVariants}>
           <div className="sticky top-24">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800 relative inline-block">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800 relative inline-block gradient-text">
               More in {toUpperCaseFirst(category)}
-              <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-blue-600 rounded"></span>
+              <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></span>
             </h2>
             <div className="space-y-6">
               {otherNews.slice(0, 5).map((item, index) => (
-                <div
+                <motion.div
                   key={item._id}
-                  className="bg-white p-5 rounded-xl shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  className="fancy-card bg-white transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
                 >
                   <Link href={{ pathname: `/${category}/${item.title}`, query: { id: item._id } }} className="block">
                     <div className="flex flex-col sm:flex-row md:flex-col gap-4">
-                      <img
-                        src={item.image_url || "/placeholder.svg"}
-                        alt={item.title}
-                        className="w-full sm:w-1/3 md:w-full h-40 object-cover rounded-lg shadow-sm"
-                      />
-                      <div>
-                        <h3 className="text-xl font-bold mb-2 text-gray-800 hover:text-blue-600 transition-colors duration-300">
+                      <div className="overflow-hidden rounded-t-xl md:rounded-t-xl md:rounded-b-none">
+                        <img
+                          src={item.image_url || "/placeholder.svg"}
+                          alt={item.title}
+                          className="w-full sm:w-1/3 md:w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-xl font-bold mb-2 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                           {item.title}
                         </h3>
-                        <p className="text-sm text-gray-500 mb-3">
-                          By {item.author} on{" "}
+                        <p className="text-sm text-gray-500 mb-3 flex items-center">
+                          <FaUser className="mr-1 text-blue-500" /> {item.author} •{" "}
+                          <FaRegCalendarAlt className="mx-1 text-blue-500" />
                           {new Date(item.published_date).toLocaleDateString("en-US", {
                             year: "numeric",
                             month: "short",
@@ -485,23 +609,40 @@ const NewsPage = ({ params, searchParams }) => {
                           })}
                         </p>
                         <p className="text-sm text-gray-600 line-clamp-2">{item.content.slice(0, 120)}...</p>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {item.tags.slice(0, 2).map((tag, idx) => (
+                            <Link href={`/tag/${tag}`} key={idx}>
+                              <span className="tag-pill text-xs">#{tag}</span>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </Link>
-                </div>
+                </motion.div>
               ))}
             </div>
 
             {/* Advertisement */}
-            <div className="bg-gradient-to-r from-gray-100 to-gray-200 p-6 mt-8 rounded-xl shadow-md">
+            <motion.div
+              className="bg-gradient-to-r from-gray-100 to-gray-200 p-6 mt-8 rounded-xl shadow-md shine-effect"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
               <h2 className="text-2xl font-bold mb-4 text-gray-800">Advertisement</h2>
               <div className="h-64 bg-white flex items-center justify-center rounded-lg border border-gray-300 shadow-inner">
                 <span className="text-gray-500">Ad Space</span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Newsletter Signup */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 mt-8 rounded-xl shadow-md text-white">
+            <motion.div
+              className="fancy-card p-6 mt-8 bg-gradient-to-r from-blue-600 to-purple-700 text-white"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+            >
               <h2 className="text-2xl font-bold mb-2">Stay Updated</h2>
               <p className="mb-4 text-blue-100">Subscribe to our newsletter for the latest news and updates.</p>
               <form className="flex flex-col space-y-3">
@@ -517,10 +658,32 @@ const NewsPage = ({ params, searchParams }) => {
                   Subscribe Now
                 </button>
               </form>
-            </div>
+            </motion.div>
+
+            {/* Tags Cloud */}
+            <motion.div
+              className="fancy-card p-6 mt-8 bg-white"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <h2 className="text-2xl font-bold mb-4 text-gray-800 relative inline-block gradient-text">
+                Popular Tags
+                <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></span>
+              </h2>
+              <div className="flex flex-wrap gap-2 mt-4">
+                {Array.from(new Set(news.flatMap((item) => item.tags)))
+                  .slice(0, 12)
+                  .map((tag, index) => (
+                    <Link href={`/tag/${tag}`} key={index}>
+                      <span className="tag-pill">#{tag}</span>
+                    </Link>
+                  ))}
+              </div>
+            </motion.div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   )
 }
