@@ -12,6 +12,8 @@ import Environment from "@/app/NewsComponents/Environment"
 import Politics from "@/app/NewsComponents/politics"
 import Health from "@/app/NewsComponents/Health"
 import Opinion from "@/app/NewsComponents/Opinion"
+import { AnimatedSection } from "@/components/animated-section"
+import { motion } from "framer-motion"
 
 export default function Home() {
   const [news, setNews] = useState([])
@@ -61,10 +63,28 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600 mb-4"></div>
-        <h2 className="text-xl font-bold text-gray-700 mb-2">Loading News</h2>
-        <p className="text-gray-500">Please wait while we fetch the latest stories...</p>
+      <div className="flex flex-col items-center justify-center h-screen bg-background">
+        <motion.div
+          className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary mb-4"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        />
+        <motion.h2
+          className="text-xl font-bold text-foreground mb-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          Loading News
+        </motion.h2>
+        <motion.p
+          className="text-muted-foreground"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          Please wait while we fetch the latest stories...
+        </motion.p>
       </div>
     )
   }
@@ -72,49 +92,61 @@ export default function Home() {
   return (
     <div>
       {news.length > 0 && (
-        <main className="flex-col font-serif w-full md:w-9/12 bg-white m-auto py-2 fade-in">
-          <section className="transform transition-all duration-500">
+        <main className="flex-col font-serif w-full md:w-9/12 bg-background m-auto py-2 fade-in">
+          <AnimatedSection>
             <Trending news={treandingNews} />
-          </section>
-          <section className="transform transition-all duration-500">
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.1}>
             <Featuring news={featuringNews} />
-          </section>
-          <section className="transform transition-all duration-500">
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.2}>
             <Business news={businessNews} />
-          </section>
-          <section className="transform transition-all duration-500">
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.3}>
             <Politics news={politicsNews} />
-          </section>
-          <section className="transform transition-all duration-500">
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.4}>
             <Environment news={environment} />
-          </section>
-          <section className="transform transition-all duration-500">
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.5}>
             <Opinion news={opinionNews} />
-          </section>
-          <section className="grid grid-rows-4 lg:grid-rows-2 grid-flow-col gap-4 lg:gap-6 border-gray-500 transform transition-all duration-500">
-            <div className="row-span-2 pb-2 border-b-2">
+          </AnimatedSection>
+
+          <AnimatedSection
+            delay={0.6}
+            className="grid grid-rows-4 lg:grid-rows-2 grid-flow-col gap-4 lg:gap-6 border-border"
+          >
+            <div className="row-span-2 pb-2 border-b-2 border-border">
               <Lifestyle news={lifestyle} />
             </div>
-            <div className="row-span-2 pb-2 border-b-2">
+            <div className="row-span-2 pb-2 border-b-2 border-border">
               <Entertainment news={entertainment} />
             </div>
-          </section>
-          <section className="transform transition-all duration-500">
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.7}>
             <Tech news={techNews} />
-          </section>
-          <section className="transform transition-all duration-500">
-            <h1 className="text-3xl w-100 text-center text-gray-800 font-bold mb-6 relative inline-block">
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.8}>
+            <h1 className="text-3xl w-100 text-center text-foreground font-bold mb-6 relative inline-block gradient-text">
               Sports
-              <span className="absolute bottom-0 left-0 w-full h-1 bg-green-600 rounded"></span>
+              <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-primary rounded"></span>
             </h1>
             <div className="grid grid-rows-4 lg:grid-rows-2 grid-flow-col gap-4 lg:gap-6">
               <Cricket news={sportsNews} />
               <Football news={sportsNews} />
             </div>
-          </section>
-          <section className="transform transition-all duration-500">
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.9}>
             <Health news={healthNews} />
-          </section>
+          </AnimatedSection>
         </main>
       )}
     </div>

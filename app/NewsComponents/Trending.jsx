@@ -21,25 +21,53 @@ const Trending = ({ news }) => {
     return format(new Date(date), "dd MMM, yyyy")
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15,
+      },
+    },
+  }
+
   return (
-    <div className="flex flex-row justify-center border-b-2 pb-6 border-gray-400 bg-gradient-to-r from-blue-50 via-white to-purple-50">
+    <motion.div
+      className="flex flex-row justify-center border-b-2 pb-6 border-border bg-gradient-to-r from-primary/5 via-background to-primary/5"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }}
+      variants={containerVariants}
+    >
       <div className="w-full">
         <div className="w-full flex-row justify-between items-center m-auto p-4">
-          <motion.div
-            className="flex justify-between items-center text-gray-800 mb-6"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <motion.div className="flex justify-between items-center text-foreground mb-6" variants={itemVariants}>
             <h1 className="text-3xl font-bold relative gradient-text">
               Trending News
-              <span className="absolute bottom-0 left-0 w-1/3 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></span>
+              <span className="absolute bottom-0 left-0 w-1/3 h-1 bg-gradient-to-r from-primary to-primary/50 rounded"></span>
             </h1>
             <Link href="/trending" legacyBehavior>
-              <a className="fancy-button flex items-center py-2 px-4">
+              <motion.a
+                className="fancy-button flex items-center py-2 px-4"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <h2 className="text-xl px-2">View All</h2>
                 <GrLinkNext className="text-xl" />
-              </a>
+              </motion.a>
             </Link>
           </motion.div>
           <Swiper
@@ -95,11 +123,13 @@ const Trending = ({ news }) => {
                         alt={item.title}
                       />
                     </div>
-                    <div className="w-full md:w-1/2 inline-block align-middle p-4 md:border-l-2 md:border-gray-100 bg-gradient-to-br from-white to-blue-50">
-                      <h2 className="text-gray-800 text-xl md:text-lg font-bold mb-2 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300">
+                    <div className="w-full md:w-1/2 inline-block align-middle p-4 md:border-l-2 md:border-border bg-gradient-to-br from-card to-card/80">
+                      <h2 className="text-card-foreground text-xl md:text-lg font-bold mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-300">
                         {item.title}
                       </h2>
-                      <p className="text-gray-600 text-sm line-clamp-3 mb-2">{item.content.substring(0, 100)}...</p>
+                      <p className="text-muted-foreground text-sm line-clamp-3 mb-2">
+                        {item.content.substring(0, 100)}...
+                      </p>
                       <div className="flex flex-wrap gap-2 mb-2">
                         {item.tags.slice(0, 2).map((tag, idx) => (
                           <Link href={`/tag/${tag}`} key={idx}>
@@ -110,10 +140,10 @@ const Trending = ({ news }) => {
                         ))}
                       </div>
                       <div className="flex justify-between items-center mt-auto">
-                        <span className="text-sm text-gray-700 flex items-center">
-                          <FaUser className="mr-1 text-blue-500" /> {item.author}
+                        <span className="text-sm text-foreground flex items-center">
+                          <FaUser className="mr-1 text-primary" /> {item.author}
                         </span>
-                        <span className="text-xs flex items-center bg-red-50 text-red-800 px-2 py-1 rounded-full">
+                        <span className="text-xs flex items-center bg-primary/10 text-primary px-2 py-1 rounded-full">
                           <FaCalendarAlt className="mr-1" /> {formatDate(item.published_date)}
                         </span>
                       </div>
@@ -125,7 +155,7 @@ const Trending = ({ news }) => {
           </Swiper>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

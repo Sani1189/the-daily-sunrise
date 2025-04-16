@@ -140,19 +140,23 @@ const NewsPage = ({ params, searchParams }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-        <p className="ml-4 text-xl text-gray-700">Loading article...</p>
+      <div className="flex justify-center items-center h-screen bg-background">
+        <motion.div
+          className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        ></motion.div>
+        <p className="ml-4 text-xl text-foreground">Loading article...</p>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50">
-        <div className="text-red-500 text-5xl mb-4">⚠️</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Error Loading Content</h2>
-        <p className="text-gray-600 mb-6">{error}</p>
+      <div className="flex flex-col justify-center items-center h-screen bg-background">
+        <div className="text-destructive text-5xl mb-4">⚠️</div>
+        <h2 className="text-2xl font-bold text-foreground mb-2">Error Loading Content</h2>
+        <p className="text-muted-foreground mb-6">{error}</p>
         <Link href="/" className="fancy-button">
           Return to Homepage
         </Link>
@@ -255,11 +259,11 @@ const NewsPage = ({ params, searchParams }) => {
   }
 
   return (
-    <div className="container mx-auto p-4 bg-gray-50">
+    <div className="container mx-auto p-4 bg-background">
       {/* Reading progress bar */}
-      <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
+      <div className="fixed top-0 left-0 w-full h-1 bg-muted z-50">
         <div
-          className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+          className="h-full bg-gradient-to-r from-primary to-primary/70"
           style={{ width: `${readingProgress}%` }}
         ></div>
       </div>
@@ -275,32 +279,32 @@ const NewsPage = ({ params, searchParams }) => {
           <div className="flex justify-start ml-1 mb-4">
             <Link
               href={`/${mainNews.country}`}
-              className="text-2xl text-gray-700 font-bold hover:text-blue-700 transition-colors duration-300 fancy-underline"
+              className="text-2xl text-foreground font-bold hover:text-primary transition-colors duration-300 fancy-underline"
             >
               {toUpperCaseFirst(mainNews.country)}
             </Link>
-            <p className="text-xl text-gray-800 font-bold px-2">|</p>
+            <p className="text-xl text-foreground font-bold px-2">|</p>
             <Link
               href={`/${category}`}
-              className="text-2xl text-gray-700 font-bold hover:text-blue-700 transition-colors duration-300 fancy-underline"
+              className="text-2xl text-foreground font-bold hover:text-primary transition-colors duration-300 fancy-underline"
             >
               {toUpperCaseFirst(category)}
             </Link>
           </div>
           {mainNews && (
-            <motion.div className="fancy-card p-6 md:p-8 bg-white relative" variants={itemVariants}>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800 leading-tight gradient-text">
+            <motion.div className="fancy-card p-6 md:p-8 relative" variants={itemVariants}>
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-card-foreground leading-tight gradient-text">
                 {mainNews.title}
               </h1>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white mr-3 shadow-md">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/50 rounded-full flex items-center justify-center text-primary-foreground mr-3 shadow-md">
                     {mainNews.author.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-800">{mainNews.author}</p>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FaRegCalendarAlt className="mr-1 text-blue-500" />
+                    <p className="font-medium text-foreground">{mainNews.author}</p>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <FaRegCalendarAlt className="mr-1 text-primary" />
                       <time dateTime={mainNews.published_date}>
                         {new Date(mainNews.published_date).toLocaleDateString("en-US", {
                           year: "numeric",
@@ -312,10 +316,12 @@ const NewsPage = ({ params, searchParams }) => {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <button
+                  <motion.button
                     onClick={copyLinkToClipboard}
-                    className="p-2 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors duration-300 relative"
+                    className="p-2 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors duration-300 relative"
                     aria-label="Copy link"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
                     <FaLink size={20} />
                     <AnimatePresence>
@@ -324,49 +330,57 @@ const NewsPage = ({ params, searchParams }) => {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
-                          className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap"
+                          className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-popover text-popover-foreground text-xs py-1 px-2 rounded whitespace-nowrap"
                         >
                           Link copied!
                         </motion.div>
                       )}
                     </AnimatePresence>
-                  </button>
-                  <a
+                  </motion.button>
+                  <motion.a
                     href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
                     className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors duration-300"
                     aria-label="Share on Facebook"
                     target="_blank"
                     rel="noopener noreferrer"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
                     <FaFacebook size={20} />
-                  </a>
-                  <a
+                  </motion.a>
+                  <motion.a
                     href={`https://x.com/intent/tweet?url=${encodeURIComponent(window.location.href)}`}
-                    className="p-2 bg-gray-100 text-black rounded-full hover:bg-gray-200 transition-colors duration-300"
+                    className="p-2 bg-secondary text-foreground rounded-full hover:bg-secondary/80 transition-colors duration-300"
                     aria-label="Share on Twitter"
                     target="_blank"
                     rel="noopener noreferrer"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
                     <FaXTwitter size={20} />
-                  </a>
-                  <a
+                  </motion.a>
+                  <motion.a
                     href={`https://www.instagram.com/?url=${encodeURIComponent(window.location.href)}`}
                     className="p-2 bg-pink-100 text-pink-600 rounded-full hover:bg-pink-200 transition-colors duration-300"
                     aria-label="Share on Instagram"
                     target="_blank"
                     rel="noopener noreferrer"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
                     <FaInstagram size={20} />
-                  </a>
-                  <button
+                  </motion.a>
+                  <motion.button
                     onClick={toggleBookmark}
                     className={`p-2 rounded-full transition-colors duration-300 ${
-                      isBookmarked ? "bg-yellow-100 text-yellow-600" : "bg-gray-100 text-gray-600"
+                      isBookmarked ? "bg-yellow-100 text-yellow-600" : "bg-secondary text-secondary-foreground"
                     }`}
                     aria-label={isBookmarked ? "Remove bookmark" : "Bookmark article"}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
                     {isBookmarked ? <FaBookmark size={20} /> : <FaRegBookmark size={20} />}
-                  </button>
+                  </motion.button>
                 </div>
               </div>
               <div className="relative overflow-hidden rounded-xl mb-6 shadow-md">
@@ -386,21 +400,21 @@ const NewsPage = ({ params, searchParams }) => {
                   </Link>
                 ))}
               </div>
-              <div className="text-lg text-gray-700 leading-relaxed space-y-6 whitespace-pre-line">
+              <div className="text-lg text-foreground leading-relaxed space-y-6 whitespace-pre-line">
                 <p>{firstPart}</p>
                 {/* Advertisement */}
-                <div className="bg-gradient-to-r from-gray-100 to-gray-200 p-6 my-8 rounded-lg shadow-md shine-effect">
-                  <h2 className="text-2xl font-bold mb-4 text-gray-800">Advertisement</h2>
-                  <div className="flex justify-center items-center h-32 bg-white rounded-lg border border-gray-300 shadow-inner">
-                    <span className="text-gray-500">Ad space</span>
+                <div className="bg-gradient-to-r from-card to-card/80 p-6 my-8 rounded-lg shadow-md shine-effect">
+                  <h2 className="text-2xl font-bold mb-4 text-card-foreground">Advertisement</h2>
+                  <div className="flex justify-center items-center h-32 bg-background rounded-lg border border-border shadow-inner">
+                    <span className="text-muted-foreground">Ad space</span>
                   </div>
                 </div>
                 <p>{secondPart}</p>
                 {/* Advertisement */}
-                <div className="bg-gradient-to-r from-gray-100 to-gray-200 p-6 my-8 rounded-lg shadow-md shine-effect">
-                  <h2 className="text-2xl font-bold mb-4 text-gray-800">Advertisement</h2>
-                  <div className="flex justify-center items-center h-32 bg-white rounded-lg border border-gray-300 shadow-inner">
-                    <span className="text-gray-500">Ad space</span>
+                <div className="bg-gradient-to-r from-card to-card/80 p-6 my-8 rounded-lg shadow-md shine-effect">
+                  <h2 className="text-2xl font-bold mb-4 text-card-foreground">Advertisement</h2>
+                  <div className="flex justify-center items-center h-32 bg-background rounded-lg border border-border shadow-inner">
+                    <span className="text-muted-foreground">Ad space</span>
                   </div>
                 </div>
                 <p>{thirdPart}</p>
@@ -410,22 +424,29 @@ const NewsPage = ({ params, searchParams }) => {
 
           {/* Comments Section */}
           <motion.div
-            className="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-8 mt-8 rounded-xl shadow-xl"
+            className="bg-gradient-to-br from-card via-card/90 to-card/80 p-8 mt-8 rounded-xl shadow-xl"
             variants={itemVariants}
           >
-            <h2 className="text-3xl font-extrabold text-gray-800 mb-6 border-b-2 pb-2 border-blue-500 relative gradient-text">
+            <h2 className="text-3xl font-extrabold text-card-foreground mb-6 border-b-2 pb-2 border-primary relative gradient-text">
               Latest Comments
-              <span className="absolute top-0 right-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm px-2 py-1 rounded-full">
+              <span className="absolute top-0 right-0 bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-sm px-2 py-1 rounded-full">
                 {comments.length}
               </span>
             </h2>
             {comments.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-600 italic mb-4">No comments yet. Be the first to share your thoughts!</p>
+                <p className="text-muted-foreground italic mb-4">
+                  No comments yet. Be the first to share your thoughts!
+                </p>
                 <div className="mt-4">
-                  <a href="#comment-form" className="inline-flex items-center px-4 py-2 fancy-button">
+                  <motion.a
+                    href="#comment-form"
+                    className="inline-flex items-center px-4 py-2 fancy-button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
                     Add a Comment
-                  </a>
+                  </motion.a>
                 </div>
               </div>
             ) : (
@@ -433,26 +454,26 @@ const NewsPage = ({ params, searchParams }) => {
                 {comments.map((comment, index) => (
                   <motion.div
                     key={index}
-                    className={`flex items-start space-x-4 py-6 ${index < 3 ? "bg-gradient-to-r from-blue-50 to-white" : "bg-white"} rounded-lg shadow-md px-6 mb-4 transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 fancy-card`}
+                    className={`flex items-start space-x-4 py-6 ${index < 3 ? "bg-gradient-to-r from-primary/5 to-background" : "bg-card"} rounded-lg shadow-md px-6 mb-4 transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 fancy-card`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
                     {/* Random icons for the latest three comments */}
-                    {index === 0 && <FaUserCircle className="w-10 h-10 text-blue-600" />}
-                    {index === 1 && <FaRegUser className="w-10 h-10 text-green-500" />}
-                    {index === 2 && <FaUserAlt className="w-10 h-10 text-purple-500" />}
-                    {index > 2 && <FaUserCircle className="w-10 h-10 text-gray-500" />}
+                    {index === 0 && <FaUserCircle className="w-10 h-10 text-primary" />}
+                    {index === 1 && <FaRegUser className="w-10 h-10 text-primary/80" />}
+                    {index === 2 && <FaUserAlt className="w-10 h-10 text-primary/60" />}
+                    {index > 2 && <FaUserCircle className="w-10 h-10 text-muted-foreground" />}
 
                     <div className="flex-1">
                       <div className="flex justify-between items-center mb-2">
                         <p className="font-semibold gradient-text text-lg">{comment.name}</p>
-                        <p className="text-sm text-gray-500 flex items-center">
+                        <p className="text-sm text-muted-foreground flex items-center">
                           <FaRegClock className="mr-1" />
                           {timeAgo(comment.date)}
                         </p>
                       </div>
-                      <p className="text-gray-700 mt-2 text-md leading-relaxed">{comment.comment}</p>
+                      <p className="text-foreground mt-2 text-md leading-relaxed">{comment.comment}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -461,21 +482,21 @@ const NewsPage = ({ params, searchParams }) => {
           </motion.div>
 
           {/* Comment Form */}
-          <motion.div id="comment-form" className="fancy-card p-8 mt-8 bg-white" variants={itemVariants}>
-            <h2 className="text-2xl font-bold mb-6 text-gray-800 relative inline-block gradient-text">
+          <motion.div id="comment-form" className="fancy-card p-8 mt-8 bg-card" variants={itemVariants}>
+            <h2 className="text-2xl font-bold mb-6 text-card-foreground relative inline-block gradient-text">
               Leave a Comment
-              <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></span>
+              <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-gradient-to-r from-primary to-primary/50 rounded"></span>
             </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="name">
+                  <label className="block text-sm font-medium text-foreground mb-2" htmlFor="name">
                     Name
                   </label>
                   <input
                     type="text"
                     id="name"
-                    className="w-full p-4 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                    className="w-full p-4 border border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-300"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your name"
@@ -483,13 +504,13 @@ const NewsPage = ({ params, searchParams }) => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="email">
+                  <label className="block text-sm font-medium text-foreground mb-2" htmlFor="email">
                     Email
                   </label>
                   <input
                     type="email"
                     id="email"
-                    className="w-full p-4 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                    className="w-full p-4 border border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-300"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
@@ -498,12 +519,12 @@ const NewsPage = ({ params, searchParams }) => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="comment">
+                <label className="block text-sm font-medium text-foreground mb-2" htmlFor="comment">
                   Comment
                 </label>
                 <textarea
                   id="comment"
-                  className="w-full p-4 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300 min-h-[150px]"
+                  className="w-full p-4 border border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-300 min-h-[150px]"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Share your thoughts..."
@@ -513,7 +534,7 @@ const NewsPage = ({ params, searchParams }) => {
 
               {formError && (
                 <motion.div
-                  className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200"
+                  className="p-4 bg-destructive/10 text-destructive rounded-lg border border-destructive/20"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
@@ -523,7 +544,7 @@ const NewsPage = ({ params, searchParams }) => {
 
               {successMessage && (
                 <motion.div
-                  className="p-4 bg-green-50 text-green-700 rounded-lg border border-green-200"
+                  className="p-4 bg-green-50 text-green-700 rounded-lg border border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-900"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
@@ -541,7 +562,7 @@ const NewsPage = ({ params, searchParams }) => {
                 {isSubmitting ? (
                   <span className="flex items-center">
                     <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary-foreground"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -573,15 +594,15 @@ const NewsPage = ({ params, searchParams }) => {
         {/* Other news section */}
         <motion.div className="md:w-1/3" variants={itemVariants}>
           <div className="sticky top-24">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800 relative inline-block gradient-text">
+            <h2 className="text-2xl font-bold mb-6 text-foreground relative inline-block gradient-text">
               More in {toUpperCaseFirst(category)}
-              <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></span>
+              <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-gradient-to-r from-primary to-primary/50 rounded"></span>
             </h2>
             <div className="space-y-6">
               {otherNews.slice(0, 5).map((item, index) => (
                 <motion.div
                   key={item._id}
-                  className="fancy-card bg-white transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+                  className="fancy-card bg-card transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -596,19 +617,19 @@ const NewsPage = ({ params, searchParams }) => {
                         />
                       </div>
                       <div className="p-4">
-                        <h3 className="text-xl font-bold mb-2 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                        <h3 className="text-xl font-bold mb-2 text-card-foreground group-hover:text-primary transition-colors duration-300">
                           {item.title}
                         </h3>
-                        <p className="text-sm text-gray-500 mb-3 flex items-center">
-                          <FaUser className="mr-1 text-blue-500" /> {item.author} •{" "}
-                          <FaRegCalendarAlt className="mx-1 text-blue-500" />
+                        <p className="text-sm text-muted-foreground mb-3 flex items-center">
+                          <FaUser className="mr-1 text-primary" /> {item.author} •{" "}
+                          <FaRegCalendarAlt className="mx-1 text-primary" />
                           {new Date(item.published_date).toLocaleDateString("en-US", {
                             year: "numeric",
                             month: "short",
                             day: "numeric",
                           })}
                         </p>
-                        <p className="text-sm text-gray-600 line-clamp-2">{item.content.slice(0, 120)}...</p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{item.content.slice(0, 120)}...</p>
                         <div className="flex flex-wrap gap-2 mt-3">
                           {item.tags.slice(0, 2).map((tag, idx) => (
                             <Link href={`/tag/${tag}`} key={idx}>
@@ -625,58 +646,64 @@ const NewsPage = ({ params, searchParams }) => {
 
             {/* Advertisement */}
             <motion.div
-              className="bg-gradient-to-r from-gray-100 to-gray-200 p-6 mt-8 rounded-xl shadow-md shine-effect"
+              className="bg-gradient-to-r from-card to-card/80 p-6 mt-8 rounded-xl shadow-md shine-effect"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">Advertisement</h2>
-              <div className="h-64 bg-white flex items-center justify-center rounded-lg border border-gray-300 shadow-inner">
-                <span className="text-gray-500">Ad Space</span>
+              <h2 className="text-2xl font-bold mb-4 text-card-foreground">Advertisement</h2>
+              <div className="h-64 bg-background flex items-center justify-center rounded-lg border border-border shadow-inner">
+                <span className="text-muted-foreground">Ad Space</span>
               </div>
             </motion.div>
 
             {/* Newsletter Signup */}
             <motion.div
-              className="fancy-card p-6 mt-8 bg-gradient-to-r from-blue-600 to-purple-700 text-white"
+              className="fancy-card p-6 mt-8 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
             >
               <h2 className="text-2xl font-bold mb-2">Stay Updated</h2>
-              <p className="mb-4 text-blue-100">Subscribe to our newsletter for the latest news and updates.</p>
+              <p className="mb-4 text-primary-foreground/80">
+                Subscribe to our newsletter for the latest news and updates.
+              </p>
               <form className="flex flex-col space-y-3">
                 <input
                   type="email"
                   placeholder="Your email address"
-                  className="px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="px-4 py-3 rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 bg-background"
                 />
-                <button
+                <motion.button
                   type="submit"
-                  className="px-4 py-3 bg-white text-blue-700 rounded-lg font-medium hover:bg-blue-50 transition-colors duration-300"
+                  className="px-4 py-3 bg-background text-primary rounded-lg font-medium hover:bg-background/90 transition-colors duration-300"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   Subscribe Now
-                </button>
+                </motion.button>
               </form>
             </motion.div>
 
             {/* Tags Cloud */}
             <motion.div
-              className="fancy-card p-6 mt-8 bg-white"
+              className="fancy-card p-6 mt-8 bg-card"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              <h2 className="text-2xl font-bold mb-4 text-gray-800 relative inline-block gradient-text">
+              <h2 className="text-2xl font-bold mb-4 text-card-foreground relative inline-block gradient-text">
                 Popular Tags
-                <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></span>
+                <span className="absolute bottom-0 left-0 w-1/2 h-1 bg-gradient-to-r from-primary to-primary/50 rounded"></span>
               </h2>
               <div className="flex flex-wrap gap-2 mt-4">
                 {Array.from(new Set(news.flatMap((item) => item.tags)))
                   .slice(0, 12)
                   .map((tag, index) => (
                     <Link href={`/tag/${tag}`} key={index}>
-                      <span className="tag-pill">#{tag}</span>
+                      <motion.span className="tag-pill" whileHover={{ scale: 1.05, y: -2 }}>
+                        #{tag}
+                      </motion.span>
                     </Link>
                   ))}
               </div>
