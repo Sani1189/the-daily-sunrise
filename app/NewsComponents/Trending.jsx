@@ -1,7 +1,7 @@
 // components/Trending.jsx
 "use client"
 import { Navigation, Pagination, Autoplay, EffectCoverflow } from "swiper/modules"
-import { GrLinkNext } from "react-icons/gr"
+import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useSwiper } from "swiper/react"
 import { Swiper, SwiperSlide } from "swiper/react"
@@ -46,19 +46,22 @@ const Trending = ({ news }) => {
 
   return (
     <motion.div
-      className="flex flex-row justify-center border-b-2 pb-6 border-border bg-gradient-to-r from-primary/5 via-background to-primary/5"
+      className="flex flex-row justify-center border-b-2 pb-6 border-border bg-gradient-to-r from-primary/5 via-background to-primary/5 rounded-xl shadow-md"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
     >
       <div className="w-full">
-        <div className="w-full flex-row justify-between items-center m-auto p-4">
+        <div className="w-full flex-row justify-between items-center m-auto p-6">
           <motion.div className="flex justify-between items-center text-foreground mb-6" variants={itemVariants}>
-            <h1 className="text-3xl font-bold relative gradient-text">
-              Trending News
-              <span className="absolute bottom-0 left-0 w-1/3 h-1 bg-gradient-to-r from-primary to-primary/50 rounded"></span>
-            </h1>
+            <div>
+              <h1 className="text-3xl font-bold relative gradient-text">
+                Trending News
+                <span className="absolute bottom-0 left-0 w-1/3 h-1 bg-gradient-to-r from-primary to-primary/50 rounded"></span>
+              </h1>
+              <p className="text-muted-foreground mt-2">Stay updated with the most popular stories</p>
+            </div>
             <Link href="/trending" legacyBehavior>
               <motion.a
                 className="fancy-button flex items-center py-2 px-4"
@@ -66,7 +69,7 @@ const Trending = ({ news }) => {
                 whileTap={{ scale: 0.95 }}
               >
                 <h2 className="text-xl px-2">View All</h2>
-                <GrLinkNext className="text-xl" />
+                <ArrowRight className="h-5 w-5" />
               </motion.a>
             </Link>
           </motion.div>
@@ -114,9 +117,10 @@ const Trending = ({ news }) => {
                       pathname: "/trending/" + item.title,
                       query: { id: item._id },
                     }}
-                    className="flex flex-col md:flex-row justify-between w-full fancy-card group h-full"
+                    className="flex flex-col md:flex-row justify-between w-full fancy-card group h-full overflow-hidden"
                   >
-                    <div className="flex w-full md:w-1/2 p-0 overflow-hidden">
+                    <div className="flex w-full md:w-1/2 p-0 overflow-hidden relative">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       <img
                         className="object-cover h-48 md:h-full w-full transition-transform duration-500 group-hover:scale-110"
                         src={item.image_url || "/placeholder.svg"}
@@ -146,6 +150,9 @@ const Trending = ({ news }) => {
                         <span className="text-xs flex items-center bg-primary/10 text-primary px-2 py-1 rounded-full">
                           <FaCalendarAlt className="mr-1" /> {formatDate(item.published_date)}
                         </span>
+                      </div>
+                      <div className="mt-3 flex items-center text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                        Read full story <ArrowRight className="ml-1 h-4 w-4" />
                       </div>
                     </div>
                   </Link>

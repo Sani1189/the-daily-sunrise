@@ -6,17 +6,17 @@ const Environment = ({ news }) => {
   const enews = _.sortBy(news, "published_date").reverse()
 
   return (
-    <div className="py-8 bg-gradient-to-r from-blue-50 to-white">
+    <div className="py-8 bg-gradient-to-r from-primary/5 to-card">
       <div className="flex items-center justify-center mt-3 mb-8">
-        <div className="flex-grow border-t border-b border-blue-700 h-2"></div>
-        <h1 className="text-2xl sm:text-3xl text-center text-blue-700 font-bold p-3 rounded-xl bg-blue-50 shadow-sm">
+        <div className="flex-grow border-t border-b border-primary h-2"></div>
+        <h1 className="text-2xl sm:text-3xl text-center text-primary font-bold p-3 rounded-xl bg-primary/10 shadow-sm">
           Environment
         </h1>
-        <div className="flex-grow border-t border-b border-blue-700 h-2"></div>
+        <div className="flex-grow border-t border-b border-primary h-2"></div>
       </div>
 
       {enews.length > 0 && (
-        <div className="flex flex-col xl:flex-row justify-center p-2 xl:pl-3 gap-6 border-gray-400 max-w-7xl mx-auto">
+        <div className="flex flex-col xl:flex-row justify-center p-2 xl:pl-3 gap-6 border-border max-w-7xl mx-auto">
           <div className="grid grid-rows-2 grid-cols-2 gap-4">
             {enews.slice(0, 4).map((item, index) => (
               <Link
@@ -50,18 +50,18 @@ const Environment = ({ news }) => {
                   pathname: "/environment/" + item.title,
                   query: { id: item._id },
                 }}
-                className="flex flex-row border-b border-gray-200 p-3 hover:bg-blue-50 transition-colors duration-300 rounded-lg"
+                className="flex flex-row border-b border-border p-3 hover:bg-primary/5 transition-colors duration-300 rounded-lg"
               >
                 <img
                   src={item.image_url || "/placeholder.svg"}
                   alt={item.title}
-                  className="object-cover my-auto h-20 w-20 rounded-full shadow-md border-2 border-white"
+                  className="object-cover my-auto h-20 w-20 rounded-full shadow-md border-2 border-card"
                 />
                 <div className="flex flex-col h-auto justify-center p-3 flex-1">
-                  <h1 className="text-gray-800 font-bold text-lg hover:text-blue-700 transition-colors duration-300">
+                  <h1 className="text-foreground font-bold text-lg hover:text-primary transition-colors duration-300">
                     {item.title}
                   </h1>
-                  <p className="text-gray-500 flex flex-row justify-between text-sm mt-2">
+                  <p className="text-muted-foreground flex flex-row justify-between text-sm mt-2">
                     <span>{item.author}</span>
                     <span>{format(new Date(item.published_date), "dd MMM, yyyy")}</span>
                   </p>

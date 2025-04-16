@@ -157,6 +157,8 @@ body {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80;
 }
 
+/* Update the news-card and news-title classes to use theme variables */
+
 .news-card {
   @apply bg-card text-card-foreground rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl;
 }

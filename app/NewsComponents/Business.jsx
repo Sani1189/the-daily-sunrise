@@ -13,13 +13,13 @@ const Business = ({ news }) => {
   }
 
   return (
-    <div className="flex flex-col justify-between text-black border-b-2 p-4 border-gray-400 bg-gradient-to-r from-gray-50 to-white">
+    <div className="flex flex-col justify-between text-foreground border-b-2 p-4 border-border bg-gradient-to-r from-background/50 to-card">
       <div className="flex items-center justify-center mt-6 mb-8">
-        <div className="flex-grow border-t border-b border-red-600 h-2"></div>
-        <h1 className="text-2xl sm:text-3xl text-center text-red-800 font-bold p-3 rounded-xl bg-red-50 shadow-sm">
+        <div className="flex-grow border-t border-b border-primary h-2"></div>
+        <h1 className="text-2xl sm:text-3xl text-center text-primary font-bold p-3 rounded-xl bg-primary/10 shadow-sm">
           Business
         </h1>
-        <div className="flex-grow border-t border-b border-red-600 h-2"></div>
+        <div className="flex-grow border-t border-b border-primary h-2"></div>
       </div>
 
       {bnews.length > 0 && inews.length > 0 && (
@@ -37,9 +37,9 @@ const Business = ({ news }) => {
                 >
                   <div className="row-span-1">
                     <h1 className="font-bold text-xl lg:text-2xl mb-2 news-title">{item.title}</h1>
-                    <p className="text-gray-600 mb-3 line-clamp-3">
+                    <p className="text-muted-foreground mb-3 line-clamp-3">
                       {item.content.length > 100 ? `${item.content.substring(0, 100)}` : item.content}
-                      <strong className="text-red-500">...</strong>
+                      <strong className="text-primary">...</strong>
                     </p>
                   </div>
                   <div className="row-span-1 p-2">
@@ -69,13 +69,13 @@ const Business = ({ news }) => {
                 />
               </div>
               <h1 className="font-bold text-xl lg:text-2xl mb-3 news-title">{bnews[0].title}</h1>
-              <p className="text-gray-600 mb-4 flex-grow">
+              <p className="text-muted-foreground mb-4 flex-grow">
                 {bnews[0].content.length > 100 ? `${bnews[0].content.substring(0, 150)}` : bnews[0].content}
-                <strong className="text-blue-500">...</strong>
+                <strong className="text-primary">...</strong>
               </p>
-              <div className="flex justify-between text-gray-500 mt-auto items-center">
+              <div className="flex justify-between text-muted-foreground mt-auto items-center">
                 <p className="font-medium">{bnews[0].author}</p>
-                <p className="bg-red-50 text-red-800 text-xs px-2 py-1 rounded-full">
+                <p className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
                   {formatDate(bnews[0].published_date)}
                 </p>
               </div>
@@ -89,14 +89,14 @@ const Business = ({ news }) => {
                   pathname: "/business/" + item.title,
                   query: { id: item._id },
                 }}
-                className="ml-0 lg:ml-2 border-b border-gray-200 p-3 hover:bg-red-50 transition-colors duration-300 rounded-lg"
+                className="ml-0 lg:ml-2 border-b border-border p-3 hover:bg-primary/5 transition-colors duration-300 rounded-lg"
               >
-                <h1 className="font-medium text-lg lg:text-xl hover:text-red-700 transition-colors duration-300">
+                <h1 className="font-medium text-lg lg:text-xl hover:text-primary transition-colors duration-300">
                   {item.title}
                 </h1>
                 <div className="flex justify-between items-center mt-2">
-                  <p className="text-sm text-gray-500">{item.author}</p>
-                  <p className="text-xs text-gray-500">{formatDate(item.published_date)}</p>
+                  <p className="text-sm text-muted-foreground">{item.author}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(item.published_date)}</p>
                 </div>
               </Link>
             ))}

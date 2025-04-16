@@ -10,13 +10,13 @@ import {
   FaRegClock,
   FaRegCalendarAlt,
   FaTag,
-  FaLink,
   FaRegBookmark,
   FaBookmark,
   FaUser,
 } from "react-icons/fa"
 import { FaXTwitter } from "react-icons/fa6"
 import { motion, AnimatePresence } from "framer-motion"
+import { ArrowRight, MessageCircle, Share2, Eye, Bookmark, Copy, Heart } from "lucide-react"
 
 const timeAgo = (date) => {
   const now = new Date()
@@ -59,6 +59,9 @@ const NewsPage = ({ params, searchParams }) => {
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showShareTooltip, setShowShareTooltip] = useState(false)
   const [readingProgress, setReadingProgress] = useState(0)
+  const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 50) + 10)
+  const [hasLiked, setHasLiked] = useState(false)
+  const [viewCount, setViewCount] = useState(Math.floor(Math.random() * 1000) + 100)
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -116,6 +119,9 @@ const NewsPage = ({ params, searchParams }) => {
     fetchComments()
     checkBookmark()
 
+    // Simulate view count increment
+    setViewCount((prev) => prev + 1)
+
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [category, id])
@@ -132,6 +138,15 @@ const NewsPage = ({ params, searchParams }) => {
     setIsBookmarked(!isBookmarked)
   }
 
+  const toggleLike = () => {
+    if (hasLiked) {
+      setLikeCount((prev) => prev - 1)
+    } else {
+      setLikeCount((prev) => prev + 1)
+    }
+    setHasLiked(!hasLiked)
+  }
+
   const copyLinkToClipboard = () => {
     navigator.clipboard.writeText(window.location.href)
     setShowShareTooltip(true)
@@ -141,12 +156,29 @@ const NewsPage = ({ params, searchParams }) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-background">
-        <motion.div
-          className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-        ></motion.div>
-        <p className="ml-4 text-xl text-foreground">Loading article...</p>
+        <div className="flex flex-col items-center">
+          <motion.div
+            className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary mb-4"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+          ></motion.div>
+          <motion.div
+            className="bg-card p-4 rounded-lg shadow-md flex flex-col items-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <p className="text-xl text-foreground mb-2">Loading article...</p>
+            <div className="w-48 h-2 bg-muted rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-primary"
+                initial={{ width: 0 }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+              ></motion.div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     )
   }
@@ -262,10 +294,13 @@ const NewsPage = ({ params, searchParams }) => {
     <div className="container mx-auto p-4 bg-background">
       {/* Reading progress bar */}
       <div className="fixed top-0 left-0 w-full h-1 bg-muted z-50">
-        <div
+        <motion.div
           className="h-full bg-gradient-to-r from-primary to-primary/70"
           style={{ width: `${readingProgress}%` }}
-        ></div>
+          initial={{ width: "0%" }}
+          animate={{ width: `${readingProgress}%` }}
+          transition={{ type: "spring", damping: 30, stiffness: 200 }}
+        ></motion.div>
       </div>
 
       <motion.div
@@ -274,6 +309,46 @@ const NewsPage = ({ params, searchParams }) => {
         initial="hidden"
         animate="visible"
       >
+        {/* Floating share buttons */}
+        <motion.div
+          className="fixed left-4 top-1/2 transform -translate-y-1/2 hidden lg:flex flex-col gap-3 z-40"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.5, type: "spring" }}
+        >
+          <motion.button
+            className="w-10 h-10 rounded-full bg-card shadow-lg flex items-center justify-center text-foreground hover:text-primary transition-colors"
+            whileHover={{ scale: 1.1, y: -2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={toggleLike}
+          >
+            <Heart className={`h-5 w-5 ${hasLiked ? "fill-primary text-primary" : ""}`} />
+          </motion.button>
+          <motion.button
+            className="w-10 h-10 rounded-full bg-card shadow-lg flex items-center justify-center text-foreground hover:text-primary transition-colors"
+            whileHover={{ scale: 1.1, y: -2 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <MessageCircle className="h-5 w-5" />
+          </motion.button>
+          <motion.button
+            className="w-10 h-10 rounded-full bg-card shadow-lg flex items-center justify-center text-foreground hover:text-primary transition-colors"
+            whileHover={{ scale: 1.1, y: -2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={copyLinkToClipboard}
+          >
+            <Share2 className="h-5 w-5" />
+          </motion.button>
+          <motion.button
+            className="w-10 h-10 rounded-full bg-card shadow-lg flex items-center justify-center text-foreground hover:text-primary transition-colors"
+            whileHover={{ scale: 1.1, y: -2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={toggleBookmark}
+          >
+            <Bookmark className={`h-5 w-5 ${isBookmarked ? "fill-primary text-primary" : ""}`} />
+          </motion.button>
+        </motion.div>
+
         <motion.div className="md:w-2/3" variants={itemVariants}>
           {/* Country and Category */}
           <div className="flex justify-start ml-1 mb-4">
@@ -292,7 +367,23 @@ const NewsPage = ({ params, searchParams }) => {
             </Link>
           </div>
           {mainNews && (
-            <motion.div className="fancy-card p-6 md:p-8 relative" variants={itemVariants}>
+            <motion.div className="fancy-card p-6 md:p-8 relative overflow-visible" variants={itemVariants}>
+              {/* Article stats */}
+              <div className="absolute -top-4 right-4 flex gap-3 bg-card px-4 py-2 rounded-full shadow-lg">
+                <div className="flex items-center gap-1 text-sm">
+                  <Eye className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">{viewCount}</span>
+                </div>
+                <div className="flex items-center gap-1 text-sm">
+                  <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">{comments.length}</span>
+                </div>
+                <div className="flex items-center gap-1 text-sm">
+                  <Heart className={`h-4 w-4 ${hasLiked ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+                  <span className="text-muted-foreground">{likeCount}</span>
+                </div>
+              </div>
+
               <h1 className="text-4xl md:text-5xl font-bold mb-6 text-card-foreground leading-tight gradient-text">
                 {mainNews.title}
               </h1>
@@ -323,7 +414,7 @@ const NewsPage = ({ params, searchParams }) => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
-                    <FaLink size={20} />
+                    <Copy size={20} />
                     <AnimatePresence>
                       {showShareTooltip && (
                         <motion.div
@@ -401,7 +492,9 @@ const NewsPage = ({ params, searchParams }) => {
                 ))}
               </div>
               <div className="text-lg text-foreground leading-relaxed space-y-6 whitespace-pre-line">
-                <p>{firstPart}</p>
+                <p className="first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:text-primary">
+                  {firstPart}
+                </p>
                 {/* Advertisement */}
                 <div className="bg-gradient-to-r from-card to-card/80 p-6 my-8 rounded-lg shadow-md shine-effect">
                   <h2 className="text-2xl font-bold mb-4 text-card-foreground">Advertisement</h2>
@@ -418,6 +511,44 @@ const NewsPage = ({ params, searchParams }) => {
                   </div>
                 </div>
                 <p>{thirdPart}</p>
+              </div>
+
+              {/* Article footer with tags and share */}
+              <div className="mt-8 pt-6 border-t border-border">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="flex flex-wrap gap-2">
+                    {mainNews.tags.map((tag, index) => (
+                      <Link href={`/tag/${tag}`} key={index}>
+                        <span className="tag-pill">
+                          <FaTag className="mr-1" /> {tag}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={toggleLike}
+                      className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Heart className={`h-5 w-5 ${hasLiked ? "fill-primary text-primary" : ""}`} />
+                      <span>{likeCount}</span>
+                    </button>
+                    <a
+                      href="#comment-form"
+                      className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <MessageCircle className="h-5 w-5" />
+                      <span>{comments.length}</span>
+                    </a>
+                    <button
+                      onClick={toggleBookmark}
+                      className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Bookmark className={`h-5 w-5 ${isBookmarked ? "fill-primary text-primary" : ""}`} />
+                      <span>{isBookmarked ? "Saved" : "Save"}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
@@ -602,19 +733,26 @@ const NewsPage = ({ params, searchParams }) => {
               {otherNews.slice(0, 5).map((item, index) => (
                 <motion.div
                   key={item._id}
-                  className="fancy-card bg-card transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+                  className="fancy-card bg-card transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group overflow-hidden"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -5 }}
                 >
                   <Link href={{ pathname: `/${category}/${item.title}`, query: { id: item._id } }} className="block">
                     <div className="flex flex-col sm:flex-row md:flex-col gap-4">
-                      <div className="overflow-hidden rounded-t-xl md:rounded-t-xl md:rounded-b-none">
+                      <div className="overflow-hidden rounded-t-xl md:rounded-t-xl md:rounded-b-none relative">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         <img
                           src={item.image_url || "/placeholder.svg"}
                           alt={item.title}
                           className="w-full sm:w-1/3 md:w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
                         />
+                        <div className="absolute top-2 right-2 z-20">
+                          <span className="bg-primary/80 backdrop-blur-sm text-primary-foreground text-xs px-2 py-1 rounded-full">
+                            {item.category}
+                          </span>
+                        </div>
                       </div>
                       <div className="p-4">
                         <h3 className="text-xl font-bold mb-2 text-card-foreground group-hover:text-primary transition-colors duration-300">
@@ -636,6 +774,9 @@ const NewsPage = ({ params, searchParams }) => {
                               <span className="tag-pill text-xs">#{tag}</span>
                             </Link>
                           ))}
+                        </div>
+                        <div className="mt-3 flex items-center text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                          Read full story <ArrowRight className="ml-1 h-4 w-4" />
                         </div>
                       </div>
                     </div>

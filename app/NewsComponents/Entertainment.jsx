@@ -6,9 +6,9 @@ const Entertainment = ({ news }) => {
 
   return (
     <div className="py-6">
-      <h1 className="text-2xl sm:text-3xl text-center text-gray-800 font-bold p-1 mb-6 relative inline-block">
+      <h1 className="text-2xl sm:text-3xl text-center text-foreground font-bold p-1 mb-6 relative inline-block">
         Entertainment
-        <span className="absolute bottom-0 left-0 w-full h-1 bg-purple-600 rounded"></span>
+        <span className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded"></span>
       </h1>
 
       {enews.length > 0 ? (
@@ -16,7 +16,7 @@ const Entertainment = ({ news }) => {
           {enews.slice(0, 3).map((item, index) => (
             <div
               key={index}
-              className="flex flex-col border-b border-gray-200 group overflow-hidden rounded-xl shadow-md transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white"
+              className="flex flex-col border-b border-border group overflow-hidden rounded-xl shadow-md transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-card"
             >
               <Link
                 href={{
@@ -33,13 +33,13 @@ const Entertainment = ({ news }) => {
                   />
                 </div>
                 <div className="p-4">
-                  <h1 className="text-gray-800 font-bold text-xl md:text-lg group-hover:text-purple-700 transition-colors duration-300">
+                  <h1 className="text-foreground font-bold text-xl md:text-lg group-hover:text-primary transition-colors duration-300">
                     {item.title}
                   </h1>
-                  <p className="text-gray-600 mt-2 line-clamp-2">{item.content.substring(0, 100)}...</p>
+                  <p className="text-muted-foreground mt-2 line-clamp-2">{item.content.substring(0, 100)}...</p>
                   <div className="flex justify-between items-center mt-4">
-                    <span className="text-sm text-gray-500">{item.author}</span>
-                    <span className="bg-purple-50 text-purple-800 text-xs px-2 py-1 rounded-full">Entertainment</span>
+                    <span className="text-sm text-muted-foreground">{item.author}</span>
+                    <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">Entertainment</span>
                   </div>
                 </div>
                 <span className="sr-only">Read more about {item.title}</span>
@@ -48,7 +48,7 @@ const Entertainment = ({ news }) => {
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-500 p-6 bg-gray-50 rounded-lg">
+        <p className="text-center text-muted-foreground p-6 bg-background/50 rounded-lg">
           No entertainment news available at the moment.
         </p>
       )}
