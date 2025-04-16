@@ -1,57 +1,78 @@
-// components/Environment.jsx
-import React from 'react';
-import _ from 'lodash';
-import { format } from 'date-fns';
-import Link from 'next/link';
+import _ from "lodash"
+import { format } from "date-fns"
+import Link from "next/link"
 
 const Environment = ({ news }) => {
-    const enews = _.sortBy(news, 'published_date').reverse();
+  const enews = _.sortBy(news, "published_date").reverse()
 
-    return (
-        <div>
-            <div className="flex items-center justify-center mt-3">
-                <div className="flex-grow border-t border-b border-blue-700 h-2"></div>
-                <h1 className="text-2xl sm:text-3xl text-center text-blue-700 font-bold p-1 rounded-xl">Environment</h1>
-                <div className="flex-grow border-t border-b border-blue-700 h-2"></div>
-            </div>
+  return (
+    <div className="py-8 bg-gradient-to-r from-blue-50 to-white">
+      <div className="flex items-center justify-center mt-3 mb-8">
+        <div className="flex-grow border-t border-b border-blue-700 h-2"></div>
+        <h1 className="text-2xl sm:text-3xl text-center text-blue-700 font-bold p-3 rounded-xl bg-blue-50 shadow-sm">
+          Environment
+        </h1>
+        <div className="flex-grow border-t border-b border-blue-700 h-2"></div>
+      </div>
 
-            {enews.length > 0 && (
-                <div className="flex flex-col xl:flex-row justify-center p-2 xl:pl-3 gap-2 border-gray-400">
-                    <div className='grid grid-rows-2 grid-cols-2 gap-2'>
-                        {enews.slice(0, 4).map((item, index) => (
-                            <Link key={index} href={{
-                                pathname: '/environment/' + item.title, 
-                                query: { id: item._id },
-                            }} className='row-span-1 col-span-1 flex flex-col justify-end border-gray-300' 
-                            style={{ backgroundImage: `url(${item.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '300px' }}>
-                                <div className="bg-black bg-opacity-40 m-2 rounded-lg">
-                                    <h1 className='text-white text-center p-2 pb-0 font-bold text-1xl md:text-lg'>{item.title}</h1>
-                                    <p className='hidden lg:block text-white text-center'>{format(new Date(item.published_date), 'dd/MM/yyyy')}</p>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                    <div className="flex flex-col">
-                        {enews.slice(4, 10).map((item, index) => (
-                            <Link key={index} href={{
-                                pathname: '/environment/' + item.title,
-                                query: { id: item._id },
-                            }} className='flex flex-row border-b-2 border-gray-300'>
-                                <img src={item.image_url} alt={item.title} className='object-cover my-auto h-24 w-24 p-1 rounded-full' />
-                                <div className='flex flex-col h-auto justify-center p-2'>
-                                    <h1 className='text-black font-bold text-1xl lg:text-lg'>{item.title}</h1>
-                                    <p className='text-gray-500 flex flex-row justify-between'>
-                                        <span>{item.author}</span>
-                                        <span>{format(new Date(item.published_date), 'dd/MM/yyyy')}</span>
-                                    </p>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+      {enews.length > 0 && (
+        <div className="flex flex-col xl:flex-row justify-center p-2 xl:pl-3 gap-6 border-gray-400 max-w-7xl mx-auto">
+          <div className="grid grid-rows-2 grid-cols-2 gap-4">
+            {enews.slice(0, 4).map((item, index) => (
+              <Link
+                key={index}
+                href={{
+                  pathname: "/environment/" + item.title,
+                  query: { id: item._id },
+                }}
+                className="row-span-1 col-span-1 flex flex-col justify-end rounded-xl overflow-hidden shadow-lg transform transition-all duration-500 hover:scale-[1.02] hover:shadow-xl"
+                style={{
+                  backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7)), url(${item.image_url})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  minHeight: "300px",
+                }}
+              >
+                <div className="bg-black bg-opacity-40 p-4 backdrop-blur-sm">
+                  <h1 className="text-white text-center font-bold text-xl md:text-xl mb-2">{item.title}</h1>
+                  <p className="hidden lg:block text-white text-center text-sm">
+                    {format(new Date(item.published_date), "dd MMMM, yyyy")}
+                  </p>
                 </div>
-            )}
+              </Link>
+            ))}
+          </div>
+          <div className="flex flex-col space-y-4">
+            {enews.slice(4, 10).map((item, index) => (
+              <Link
+                key={index}
+                href={{
+                  pathname: "/environment/" + item.title,
+                  query: { id: item._id },
+                }}
+                className="flex flex-row border-b border-gray-200 p-3 hover:bg-blue-50 transition-colors duration-300 rounded-lg"
+              >
+                <img
+                  src={item.image_url || "/placeholder.svg"}
+                  alt={item.title}
+                  className="object-cover my-auto h-20 w-20 rounded-full shadow-md border-2 border-white"
+                />
+                <div className="flex flex-col h-auto justify-center p-3 flex-1">
+                  <h1 className="text-gray-800 font-bold text-lg hover:text-blue-700 transition-colors duration-300">
+                    {item.title}
+                  </h1>
+                  <p className="text-gray-500 flex flex-row justify-between text-sm mt-2">
+                    <span>{item.author}</span>
+                    <span>{format(new Date(item.published_date), "dd MMM, yyyy")}</span>
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
-    );
+      )}
+    </div>
+  )
 }
 
-export default Environment;
+export default Environment
