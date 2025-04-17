@@ -23,7 +23,16 @@ import {
 import { toast } from "react-hot-toast"
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState(null)
+  interface Profile {
+    fullName: string
+    email: string
+    profileImage?: string
+    role: string
+    createdAt: string
+    lastLogin?: string
+  }
+
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -43,7 +52,14 @@ export default function ProfilePage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [passwordStrength, setPasswordStrength] = useState(0)
   const [passwordFeedback, setPasswordFeedback] = useState("")
-  const [recentActivity, setRecentActivity] = useState([])
+  interface Activity {
+    type: string
+    action: string
+    title: string
+    date: string
+  }
+
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([])
   const [stats, setStats] = useState({
     articlesPublished: 0,
     commentsModerated: 0,
@@ -122,12 +138,12 @@ export default function ProfilePage() {
     fetchAdminStats()
   }, [])
 
-  const handleChange = (e) => {
+  const handleChange = (e:any) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = (e:any) => {
     const { name, value } = e.target
     setPasswordData((prev) => ({ ...prev, [name]: value }))
 
@@ -136,7 +152,7 @@ export default function ProfilePage() {
     }
   }
 
-  const checkPasswordStrength = (password) => {
+  const checkPasswordStrength = (password:any) => {
     // Simple password strength checker
     let strength = 0
     let feedback = ""
@@ -156,7 +172,7 @@ export default function ProfilePage() {
     setPasswordFeedback(feedback)
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e:any) => {
     e.preventDefault()
 
     setIsSaving(true)
@@ -180,13 +196,13 @@ export default function ProfilePage() {
       toast.success("Profile updated successfully")
     } catch (error) {
       console.error("Error updating profile:", error)
-      toast.error(error.message || "Failed to update profile")
+      toast.error((error instanceof Error ? error.message : "An unknown error occurred") || "Failed to update profile")
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handlePasswordSubmit = async (e) => {
+  const handlePasswordSubmit = async (e:any) => {
     e.preventDefault()
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -213,7 +229,7 @@ export default function ProfilePage() {
       })
     } catch (error) {
       console.error("Error changing password:", error)
-      toast.error(error.message || "Failed to change password")
+      toast.error((error instanceof Error ? error.message : "An unknown error occurred") || "Failed to change password")
     } finally {
       setIsChangingPassword(false)
     }
@@ -300,7 +316,7 @@ export default function ProfilePage() {
         >
           <div className="flex flex-col items-center">
             <div className="relative w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center text-primary mb-4 group">
-              {profile.profileImage ? (
+              {profile?.profileImage ? (
                 <img
                   src={profile.profileImage || "/placeholder.svg"}
                   alt={profile.fullName}
@@ -314,25 +330,25 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <h2 className="text-xl font-bold text-foreground">{profile.fullName}</h2>
-            <p className="text-muted-foreground">{profile.email}</p>
+            <h2 className="text-xl font-bold text-foreground">{profile?.fullName}</h2>
+            <p className="text-muted-foreground">{profile?.email}</p>
 
             <div className="mt-4 py-2 px-4 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              {profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
+              {(profile?.role ?? "").charAt(0).toUpperCase() + (profile?.role ?? "").slice(1)}
             </div>
 
             <div className="w-full mt-6 space-y-4">
               <div className="flex items-center text-sm">
                 <FaCalendarAlt className="text-primary mr-2" />
                 <span className="text-muted-foreground">Joined: </span>
-                <span className="ml-2 text-foreground">{new Date(profile.createdAt).toLocaleDateString()}</span>
+                <span className="ml-2 text-foreground">{profile ? new Date(profile.createdAt).toLocaleDateString() : "N/A"}</span>
               </div>
 
               <div className="flex items-center text-sm">
                 <FaCalendarAlt className="text-primary mr-2" />
                 <span className="text-muted-foreground">Last Login: </span>
                 <span className="ml-2 text-foreground">
-                  {profile.lastLogin ? new Date(profile.lastLogin).toLocaleString() : "Never"}
+                  {profile?.lastLogin ? new Date(profile.lastLogin).toLocaleDateString() : "N/A"}
                 </span>
               </div>
             </div>
@@ -397,7 +413,7 @@ export default function ProfilePage() {
                 <input
                   id="email"
                   type="email"
-                  value={profile.email}
+                  value={profile?.email}
                   className="pl-10 w-full p-3 bg-background border border-input rounded-lg text-muted-foreground"
                   disabled
                 />

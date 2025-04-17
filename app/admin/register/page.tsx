@@ -74,7 +74,7 @@ export default function AdminRegister() {
       router.push("/admin/login")
     } catch (error) {
       console.error("Registration error:", error)
-      toast.error(error.message || "Registration failed")
+      toast.error(error instanceof Error ? error.message : "Registration failed")
     } finally {
       setIsLoading(false)
     }

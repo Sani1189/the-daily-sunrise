@@ -7,7 +7,11 @@ import { motion } from "framer-motion"
 import { FaSave, FaTimes, FaImage, FaTag, FaPlus, FaEye, FaChartLine } from "react-icons/fa"
 import { toast } from "react-hot-toast"
 
-export default function EditNews({ params }) {
+interface EditNewsParams {
+  id: string;
+}
+
+export default function EditNews({ params }: { params: EditNewsParams }) {
   const { id } = params
   const [formData, setFormData] = useState({
     title: "",
@@ -16,12 +20,22 @@ export default function EditNews({ params }) {
     country: "",
     category: "",
     image_url: "",
-    tags: [],
+    tags: [] as string[],
   })
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [newTag, setNewTag] = useState("")
-  const [viewStats, setViewStats] = useState(null)
+  interface ViewStats {
+    viewCount: number;
+    uniqueVisitors: number;
+    lastUpdated: string;
+    periodData: {
+      daily: { date: string; count: number }[];
+      monthly: { month: string; count: number }[];
+    };
+  }
+
+  const [viewStats, setViewStats] = useState<ViewStats | null>(null)
   const [showViewStats, setShowViewStats] = useState(false)
   const router = useRouter()
 
@@ -73,7 +87,7 @@ export default function EditNews({ params }) {
     }
   }
 
-  const handleChange = (e) => {
+  const handleChange = (e:any) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
@@ -88,14 +102,14 @@ export default function EditNews({ params }) {
     }
   }
 
-  const handleRemoveTag = (tagToRemove) => {
+  const handleRemoveTag = (tagToRemove:any) => {
     setFormData((prev) => ({
       ...prev,
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e:any) => {
     e.preventDefault()
 
     // Validate form
@@ -125,7 +139,7 @@ export default function EditNews({ params }) {
       router.push("/admin/dashboard/news")
     } catch (error) {
       console.error("Error updating article:", error)
-      toast.error(error.message || "Failed to update article")
+      toast.error(error instanceof Error ? error.message : "Failed to update article")
     } finally {
       setIsSubmitting(false)
     }

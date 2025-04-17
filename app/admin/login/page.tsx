@@ -44,7 +44,7 @@ export default function AdminLogin() {
       router.push("/admin/dashboard")
     } catch (error) {
       console.error("Login error:", error)
-      toast.error(error.message || "Login failed")
+      toast.error((error instanceof Error ? error.message : "Login failed"))
     } finally {
       setIsLoading(false)
     }

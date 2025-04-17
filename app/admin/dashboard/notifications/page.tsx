@@ -21,7 +21,7 @@ import { toast } from "react-hot-toast"
 import Link from "next/link"
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState([])
+  const [notifications, setNotifications] = useState<{ _id: string; isRead: boolean; [key: string]: any }[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -57,65 +57,101 @@ export default function NotificationsPage() {
       console.error("Error fetching notifications:", error)
       toast.error("Failed to load notifications")
 
-      // For demo purposes, let's create some sample notifications
-      const sampleNotifications = [
-        {
-          _id: "1",
-          type: "info",
-          title: "New Article Published",
-          message: "Your article 'Climate Change Report' has been published successfully.",
-          entityId: "article1",
-          entityType: "news",
-          isRead: false,
-          createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        },
-        {
-          _id: "2",
-          type: "success",
-          title: "Comment Approved",
-          message: "You approved a comment on 'Economic Policy Changes'.",
-          entityId: "comment1",
-          entityType: "comment",
-          isRead: true,
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          _id: "3",
-          type: "warning",
-          title: "Low Disk Space",
-          message: "Your server is running low on disk space. Consider cleaning up old files.",
-          entityId: "server1",
-          entityType: "system",
-          isRead: false,
-          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          _id: "4",
-          type: "error",
-          title: "Failed Login Attempt",
-          message: "There was a failed login attempt to your account from an unknown IP address.",
-          entityId: "security1",
-          entityType: "security",
-          isRead: false,
-          createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          _id: "5",
-          type: "info",
-          title: "System Update",
-          message: "The system will undergo maintenance tonight at 2 AM UTC.",
-          entityId: "system1",
-          entityType: "system",
-          isRead: true,
-          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-      ]
-
-      setNotifications(sampleNotifications)
-      setTotalPages(1)
-      setUnreadCount(3)
+      // If we can't fetch notifications, try to generate them from recent activity
+      await generateNotificationsFromActivity()
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const generateNotificationsFromActivity = async () => {
+    try {
+      // Fetch recent news articles
+      const newsResponse = await fetch("/api/admin/news?limit=20")
+      let newsData = []
+
+      if (newsResponse.ok) {
+        const data = await newsResponse.json()
+        newsData = data.news || []
+      }
+
+      // Fetch recent comments
+      const commentsResponse = await fetch("/api/admin/comments")
+      let commentsData = []
+
+      if (commentsResponse.ok) {
+        const data = await commentsResponse.json()
+        commentsData = data.comments || []
+      }
+
+      // Create notifications from news articles
+      const newsNotifications = await Promise.all(
+        newsData.map(async (news:any) => {
+          // Create a notification in the database
+          const response = await fetch("/api/notifications", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "news_created",
+              title: "New Article Published",
+              message: `Article "${news.title}" was published in ${news.category}.`,
+              entityId: news._id,
+              entityType: "news",
+            }),
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            return data.notification
+          }
+          return null
+        }),
+      )
+
+      // Create notifications from comments
+      const commentNotifications = await Promise.all(
+        commentsData.slice(0, 5).map(async (comment:any) => {
+          // Find the associated news article
+          const newsResponse = await fetch(`/api/admin/news/${comment.newsId}`)
+          let newsTitle = "an article"
+
+          if (newsResponse.ok) {
+            const newsData = await newsResponse.json()
+            newsTitle = newsData.title
+          }
+
+          // Create a notification in the database
+          const response = await fetch("/api/notifications", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "comment_created",
+              title: "New Comment Received",
+              message: `New comment by ${comment.name} on article "${newsTitle}".`,
+              entityId: comment._id,
+              entityType: "comment",
+            }),
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            return data.notification
+          }
+          return null
+        }),
+      )
+
+      // Fetch the newly created notifications
+      fetchNotifications()
+    } catch (error) {
+      console.error("Error generating notifications:", error)
+      setNotifications([])
+      setTotalPages(1)
+      setUnreadCount(0)
     }
   }
 
@@ -123,7 +159,7 @@ export default function NotificationsPage() {
     fetchNotifications()
   }, [currentPage])
 
-  const handleMarkAsRead = async (id) => {
+  const handleMarkAsRead = async (id:any) => {
     try {
       const response = await fetch(`/api/notifications/${id}`, {
         method: "PATCH",
@@ -134,28 +170,42 @@ export default function NotificationsPage() {
       })
 
       if (response.ok) {
-        setNotifications((prev) =>
-          prev.map((notification) => (notification._id === id ? { ...notification, isRead: true } : notification)),
+        setNotifications((prev:any) =>
+          prev.map((notification:any) => (notification._id === id ? { ...notification, isRead: true } : notification)),
         )
         setUnreadCount((prev) => prev - 1)
+        toast.success("Notification marked as read")
       } else {
         throw new Error("Failed to mark notification as read")
       }
     } catch (error) {
       console.error("Error marking notification as read:", error)
-
-      // For demo purposes, let's update the UI anyway
-      setNotifications((prev) =>
-        prev.map((notification) => (notification._id === id ? { ...notification, isRead: true } : notification)),
-      )
-      setUnreadCount((prev) => Math.max(0, prev - 1))
+      toast.error("Failed to mark notification as read")
     }
   }
 
   const handleMarkAllAsRead = async () => {
     try {
-      // This would be a real API endpoint in a production app
-      // For now, we'll just update the UI
+      // Mark all notifications as read in the database
+      const notificationIds = notifications.filter((n) => !n.isRead).map((n) => n._id)
+
+      if (notificationIds.length === 0) {
+        toast("No unread notifications", { icon: "ℹ️" })
+        return
+      }
+
+      const promises = notificationIds.map((id) =>
+        fetch(`/api/notifications/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ isRead: true }),
+        }),
+      )
+
+      await Promise.all(promises)
+
       setNotifications((prev) => prev.map((notification) => ({ ...notification, isRead: true })))
       setUnreadCount(0)
       toast.success("All notifications marked as read")
@@ -165,7 +215,7 @@ export default function NotificationsPage() {
     }
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id:any) => {
     try {
       const response = await fetch(`/api/notifications/${id}`, {
         method: "DELETE",
@@ -182,17 +232,11 @@ export default function NotificationsPage() {
       }
     } catch (error) {
       console.error("Error deleting notification:", error)
-
-      // For demo purposes, let's update the UI anyway
-      setNotifications((prev) => prev.filter((notification) => notification._id !== id))
-      if (notifications.find((n) => n._id === id && !n.isRead)) {
-        setUnreadCount((prev) => Math.max(0, prev - 1))
-      }
-      toast.success("Notification deleted")
+      toast.error("Failed to delete notification")
     }
   }
 
-  const handleFilterChange = (e) => {
+  const handleFilterChange = (e:any) => {
     const { name, value } = e.target
     setFilters((prev) => ({ ...prev, [name]: value }))
   }
@@ -212,11 +256,11 @@ export default function NotificationsPage() {
     fetchNotifications()
   }
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page:any) => {
     setCurrentPage(page)
   }
 
-  const getNotificationIcon = (type, entityType) => {
+  const getNotificationIcon = (type:any, entityType:any) => {
     if (entityType === "news") return <FaNewspaper />
     if (entityType === "comment") return <FaComments />
     if (entityType === "user") return <FaUser />
@@ -224,6 +268,9 @@ export default function NotificationsPage() {
     if (entityType === "security") return <FaExclamationCircle />
 
     // Fallback based on notification type
+    if (type === "news_created" || type === "news_updated" || type === "news_deleted") return <FaNewspaper />
+    if (type === "comment_created" || type === "comment_deleted") return <FaComments />
+    if (type === "user_registered") return <FaUser />
     if (type === "info") return <FaInfoCircle />
     if (type === "success") return <FaCheckCircle />
     if (type === "warning") return <FaExclamationCircle />
@@ -232,8 +279,20 @@ export default function NotificationsPage() {
     return <FaBell />
   }
 
-  const getNotificationColor = (type) => {
+  const getNotificationColor = (type:any) => {
     switch (type) {
+      case "news_created":
+        return "bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400"
+      case "news_updated":
+        return "bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+      case "news_deleted":
+        return "bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400"
+      case "comment_created":
+        return "bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400"
+      case "comment_deleted":
+        return "bg-orange-100 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400"
+      case "user_registered":
+        return "bg-teal-100 text-teal-600 dark:bg-teal-900/20 dark:text-teal-400"
       case "info":
         return "bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
       case "success":
@@ -324,10 +383,12 @@ export default function NotificationsPage() {
                 className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               >
                 <option value="">All Types</option>
-                <option value="info">Info</option>
-                <option value="success">Success</option>
-                <option value="warning">Warning</option>
-                <option value="error">Error</option>
+                <option value="news_created">News Created</option>
+                <option value="news_updated">News Updated</option>
+                <option value="news_deleted">News Deleted</option>
+                <option value="comment_created">Comment Created</option>
+                <option value="comment_deleted">Comment Deleted</option>
+                <option value="user_registered">User Registered</option>
               </select>
             </div>
             <div>
@@ -345,8 +406,6 @@ export default function NotificationsPage() {
                 <option value="news">News</option>
                 <option value="comment">Comments</option>
                 <option value="user">Users</option>
-                <option value="system">System</option>
-                <option value="security">Security</option>
               </select>
             </div>
             <div>
@@ -456,6 +515,11 @@ export default function NotificationsPage() {
                         className="text-xs text-primary hover:underline"
                       >
                         View Comment
+                      </Link>
+                    )}
+                    {notification.entityType === "user" && (
+                      <Link href={`/admin/dashboard/profile`} className="text-xs text-primary hover:underline">
+                        View Profile
                       </Link>
                     )}
                   </div>

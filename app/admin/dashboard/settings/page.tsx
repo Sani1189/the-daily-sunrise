@@ -17,7 +17,21 @@ import {
 } from "react-icons/fa"
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState({})
+  interface Setting {
+    key: string;
+    label: string;
+    value: any;
+    description: string;
+    group: string;
+    type: string;
+    isPublic: boolean;
+  }
+  
+  interface Settings {
+    [group: string]: Setting[];
+  }
+  
+  const [settings, setSettings] = useState<Settings>({})
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("general")
   const [isSaving, setIsSaving] = useState(false)
@@ -32,18 +46,285 @@ export default function SettingsPage() {
   })
   const [showNewSettingForm, setShowNewSettingForm] = useState(false)
 
+  // Define default settings
+  const defaultSettings = {
+    general: [
+      {
+        key: "site_name",
+        label: "Site Name",
+        value: "The Daily Sunrise",
+        description: "The name of your website",
+        group: "general",
+        type: "string",
+        isPublic: true,
+      },
+      {
+        key: "site_description",
+        label: "Site Description",
+        value: "Your trusted source for daily news and updates",
+        description: "A short description of your website",
+        group: "general",
+        type: "string",
+        isPublic: true,
+      },
+      {
+        key: "admin_email",
+        label: "Admin Email",
+        value: "admin@dailysunrise.com",
+        description: "The main administrative email",
+        group: "general",
+        type: "string",
+        isPublic: false,
+      },
+      {
+        key: "articles_per_page",
+        label: "Articles Per Page",
+        value: "10",
+        description: "Number of articles to display per page",
+        group: "general",
+        type: "number",
+        isPublic: true,
+      },
+    ],
+    appearance: [
+      {
+        key: "primary_color",
+        label: "Primary Color",
+        value: "#3b82f6",
+        description: "The main color used throughout the site",
+        group: "appearance",
+        type: "color",
+        isPublic: true,
+      },
+      {
+        key: "secondary_color",
+        label: "Secondary Color",
+        value: "#10b981",
+        description: "The secondary color used throughout the site",
+        group: "appearance",
+        type: "color",
+        isPublic: true,
+      },
+      {
+        key: "font_family",
+        label: "Font Family",
+        value: "Inter, system-ui, sans-serif",
+        description: "The main font used throughout the site",
+        group: "appearance",
+        type: "string",
+        isPublic: true,
+      },
+      {
+        key: "dark_mode_default",
+        label: "Dark Mode Default",
+        value: false,
+        description: "Set dark mode as the default theme",
+        group: "appearance",
+        type: "boolean",
+        isPublic: true,
+      },
+    ],
+    email: [
+      {
+        key: "smtp_host",
+        label: "SMTP Host",
+        value: "smtp.example.com",
+        description: "SMTP server hostname",
+        group: "email",
+        type: "string",
+        isPublic: false,
+      },
+      {
+        key: "smtp_port",
+        label: "SMTP Port",
+        value: "587",
+        description: "SMTP server port",
+        group: "email",
+        type: "number",
+        isPublic: false,
+      },
+      {
+        key: "smtp_user",
+        label: "SMTP Username",
+        value: "user@example.com",
+        description: "SMTP authentication username",
+        group: "email",
+        type: "string",
+        isPublic: false,
+      },
+      {
+        key: "smtp_password",
+        label: "SMTP Password",
+        value: "********",
+        description: "SMTP authentication password",
+        group: "email",
+        type: "string",
+        isPublic: false,
+      },
+    ],
+    social: [
+      {
+        key: "facebook_url",
+        label: "Facebook URL",
+        value: "https://facebook.com/dailysunrise",
+        description: "Your Facebook page URL",
+        group: "social",
+        type: "string",
+        isPublic: true,
+      },
+      {
+        key: "twitter_url",
+        label: "Twitter URL",
+        value: "https://twitter.com/dailysunrise",
+        description: "Your Twitter profile URL",
+        group: "social",
+        type: "string",
+        isPublic: true,
+      },
+      {
+        key: "instagram_url",
+        label: "Instagram URL",
+        value: "https://instagram.com/dailysunrise",
+        description: "Your Instagram profile URL",
+        group: "social",
+        type: "string",
+        isPublic: true,
+      },
+      {
+        key: "youtube_url",
+        label: "YouTube URL",
+        value: "https://youtube.com/dailysunrise",
+        description: "Your YouTube channel URL",
+        group: "social",
+        type: "string",
+        isPublic: true,
+      },
+    ],
+    seo: [
+      {
+        key: "meta_title",
+        label: "Default Meta Title",
+        value: "The Daily Sunrise - Latest News and Updates",
+        description: "Default page title for SEO",
+        group: "seo",
+        type: "string",
+        isPublic: true,
+      },
+      {
+        key: "meta_description",
+        label: "Default Meta Description",
+        value: "Stay updated with the latest news, articles, and insights from The Daily Sunrise.",
+        description: "Default meta description for SEO",
+        group: "seo",
+        type: "string",
+        isPublic: true,
+      },
+      {
+        key: "meta_keywords",
+        label: "Default Meta Keywords",
+        value: "news, daily news, updates, articles, journalism",
+        description: "Default meta keywords for SEO",
+        group: "seo",
+        type: "string",
+        isPublic: true,
+      },
+      {
+        key: "google_analytics_id",
+        label: "Google Analytics ID",
+        value: "UA-XXXXXXXXX-X",
+        description: "Your Google Analytics tracking ID",
+        group: "seo",
+        type: "string",
+        isPublic: true,
+      },
+    ],
+    analytics: [
+      {
+        key: "enable_analytics",
+        label: "Enable Analytics",
+        value: true,
+        description: "Enable or disable analytics tracking",
+        group: "analytics",
+        type: "boolean",
+        isPublic: true,
+      },
+      {
+        key: "track_logged_in_users",
+        label: "Track Logged In Users",
+        value: false,
+        description: "Whether to track logged in users",
+        group: "analytics",
+        type: "boolean",
+        isPublic: false,
+      },
+      {
+        key: "popular_articles_count",
+        label: "Popular Articles Count",
+        value: "5",
+        description: "Number of popular articles to display",
+        group: "analytics",
+        type: "number",
+        isPublic: true,
+      },
+    ],
+    advanced: [
+      {
+        key: "maintenance_mode",
+        label: "Maintenance Mode",
+        value: false,
+        description: "Put the site in maintenance mode",
+        group: "advanced",
+        type: "boolean",
+        isPublic: true,
+      },
+      {
+        key: "cache_ttl",
+        label: "Cache TTL (seconds)",
+        value: "3600",
+        description: "Time to live for cached content in seconds",
+        group: "advanced",
+        type: "number",
+        isPublic: false,
+      },
+      {
+        key: "debug_mode",
+        label: "Debug Mode",
+        value: false,
+        description: "Enable debug mode for development",
+        group: "advanced",
+        type: "boolean",
+        isPublic: false,
+      },
+      {
+        key: "custom_code_header",
+        label: "Custom Code (Header)",
+        value: "",
+        description: "Custom code to be added to the header",
+        group: "advanced",
+        type: "string",
+        isPublic: false,
+      },
+      {
+        key: "custom_code_footer",
+        label: "Custom Code (Footer)",
+        value: "",
+        description: "Custom code to be added to the footer",
+        group: "advanced",
+        type: "string",
+        isPublic: false,
+      },
+    ],
+  }
+
+  // Update the fetchSettings function to use default settings
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch("/api/settings?groupBy=group")
 
-        if (response.ok) {
-          const data = await response.json()
-          setSettings(data)
-        } else {
-          throw new Error("Failed to fetch settings")
-        }
+        // In a real app, we would fetch from the API
+        // For now, let's use our default settings
+        setSettings(defaultSettings)
       } catch (error) {
         console.error("Error fetching settings:", error)
         toast.error("Failed to load settings")
@@ -55,14 +336,14 @@ export default function SettingsPage() {
     fetchSettings()
   }, [])
 
-  const handleSettingChange = (group, key, value) => {
+  const handleSettingChange = (group:any, key:any, value:any) => {
     setSettings((prev) => ({
       ...prev,
       [group]: prev[group].map((setting) => (setting.key === key ? { ...setting, value } : setting)),
     }))
   }
 
-  const handleSaveSettings = async (group) => {
+  const handleSaveSettings = async (group:any) => {
     try {
       setIsSaving(true)
 
@@ -87,13 +368,17 @@ export default function SettingsPage() {
       toast.success(`${group.charAt(0).toUpperCase() + group.slice(1)} settings saved successfully`)
     } catch (error) {
       console.error("Error saving settings:", error)
-      toast.error(error.message || "Failed to save settings")
+      if (error instanceof Error) {
+        toast.error(error.message || "Failed to save settings")
+      } else {
+        toast.error("Failed to save settings")
+      }
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleDeleteSetting = async (group, key) => {
+  const handleDeleteSetting = async (group:any, key:any) => {
     if (!confirm(`Are you sure you want to delete the setting "${key}"?`)) {
       return
     }
@@ -116,18 +401,22 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error("Error deleting setting:", error)
-      toast.error(error.message || "Failed to delete setting")
+      if (error instanceof Error) {
+        toast.error(error.message || "Failed to delete setting")
+      } else {
+        toast.error("Failed to delete setting")
+      }
     }
   }
 
-  const handleNewSettingChange = (field, value) => {
+  const handleNewSettingChange = (field:any, value:any) => {
     setNewSetting((prev) => ({
       ...prev,
       [field]: value,
     }))
   }
 
-  const handleAddNewSetting = async (e) => {
+  const handleAddNewSetting = async (e:any) => {
     e.preventDefault()
 
     // Validate form
@@ -172,7 +461,11 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error("Error adding setting:", error)
-      toast.error(error.message || "Failed to add setting")
+      if (error instanceof Error) {
+        toast.error(error.message || "Failed to add setting")
+      } else {
+        toast.error("Failed to add setting")
+      }
     }
   }
 

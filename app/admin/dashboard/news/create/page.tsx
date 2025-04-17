@@ -21,7 +21,7 @@ export default function CreateNews() {
   const [newTag, setNewTag] = useState("")
   const router = useRouter()
 
-  const handleChange = (e) => {
+  const handleChange = (e:any) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
@@ -36,14 +36,14 @@ export default function CreateNews() {
     }
   }
 
-  const handleRemoveTag = (tagToRemove) => {
+  const handleRemoveTag = (tagToRemove:any) => {
     setFormData((prev) => ({
       ...prev,
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e:any) => {
     e.preventDefault()
 
     // Validate form
@@ -76,7 +76,7 @@ export default function CreateNews() {
       router.push("/admin/dashboard/news")
     } catch (error) {
       console.error("Error creating article:", error)
-      toast.error(error.message || "Failed to create article")
+      toast.error(error instanceof Error ? error.message : "Failed to create article")
     } finally {
       setIsSubmitting(false)
     }

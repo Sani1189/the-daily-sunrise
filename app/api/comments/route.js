@@ -1,18 +1,39 @@
 import connectMongoDB from "@/libs/DBconnect"
 import Comment from "@/models/comment"
 import { NextResponse } from "next/server"
+import Notification from "@/models/notification" // Import Notification model
+import News from "@/models/news" // Import News model
 
 export async function POST(req) {
   try {
     const { newsId, name, email, comment, date } = await req.json()
     await connectMongoDB()
-    await Comment.create({
+    const newComment = await Comment.create({
       newsId,
       name,
       email,
       comment,
       date,
     })
+
+    // Create notification for the new comment
+    try {
+      // Get the news title for the notification message
+      const news = await News.findById(newsId)
+      const newsTitle = news ? news.title : "an article"
+
+      await Notification.create({
+        type: "comment_created",
+        title: "New Comment Received",
+        message: `New comment by ${name} on article "${newsTitle}".`,
+        entityId: newComment._id,
+        entityType: "comment",
+      })
+    } catch (notificationError) {
+      console.error("Error creating notification:", notificationError)
+      // Continue even if notification creation fails
+    }
+
     return NextResponse.json({ message: "Comment posted successfully" }, { status: 200 })
   } catch (error) {
     console.error("Error posting comment:", error)

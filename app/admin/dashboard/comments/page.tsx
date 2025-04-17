@@ -7,7 +7,16 @@ import { toast } from "react-hot-toast"
 import Link from "next/link"
 
 export default function CommentsManagement() {
-  const [comments, setComments] = useState([])
+  interface Comment {
+    _id: string
+    name: string
+    email: string
+    comment: string
+    date: string
+    newsId?: { _id: string; title: string; category: string } | null
+  }
+
+  const [comments, setComments] = useState<Comment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
@@ -17,7 +26,7 @@ export default function CommentsManagement() {
   const [selectedNewsId, setSelectedNewsId] = useState("")
   const [dateRange, setDateRange] = useState({ start: "", end: "" })
   const [showSortOptions, setShowSortOptions] = useState(false)
-  const [newsOptions, setNewsOptions] = useState([])
+  const [newsOptions, setNewsOptions] = useState<{ _id: string; title: string }[]>([])
 
   const fetchComments = async () => {
     try {
@@ -71,13 +80,13 @@ export default function CommentsManagement() {
     fetchNewsOptions()
   }, [currentPage])
 
-  const handleSearch = (e) => {
+  const handleSearch = (e:any) => {
     e.preventDefault()
     setCurrentPage(1)
     fetchComments()
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id:any) => {
     if (!confirm("Are you sure you want to delete this comment?")) {
       return
     }
@@ -99,7 +108,7 @@ export default function CommentsManagement() {
     }
   }
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page:any) => {
     setCurrentPage(page)
   }
 
@@ -110,7 +119,7 @@ export default function CommentsManagement() {
 
   const handleFilterReset = () => {
     setSelectedNewsId("")
-    setDateRange({ start: "", end: "" })
+      return comments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     setCurrentPage(1)
     fetchComments()
   }
@@ -119,9 +128,9 @@ export default function CommentsManagement() {
     const sortedComments = [...comments]
 
     if (sortOrder === "newest") {
-      return sortedComments.sort((a, b) => new Date(b.date) - new Date(a.date))
+      return sortedComments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     } else if (sortOrder === "oldest") {
-      return sortedComments.sort((a, b) => new Date(a.date) - new Date(b.date))
+      return sortedComments.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     } else if (sortOrder === "name-asc") {
       return sortedComments.sort((a, b) => a.name.localeCompare(b.name))
     } else if (sortOrder === "name-desc") {
@@ -381,7 +390,7 @@ export default function CommentsManagement() {
                       <div className="flex items-center justify-end space-x-2">
                         {comment.newsId && typeof comment.newsId === "object" && (
                           <Link
-                            href={`/${comment.newsId.category}/${comment.newsId._id}`}
+                            href={`/admin/dashboard/news/edit/${comment.newsId._id}`}
                             className="p-1 text-muted-foreground hover:text-primary transition-colors"
                             title="View Article"
                           >

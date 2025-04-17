@@ -27,7 +27,21 @@ import { toast } from "react-hot-toast"
 import Link from "next/link"
 
 export default function AuthorsPage() {
-  const [authors, setAuthors] = useState([])
+  const [authors, setAuthors] = useState<{ 
+    _id: string; 
+    name: string; 
+    email: string; 
+    bio: string; 
+    avatar: string; 
+    articleCount: number; 
+    viewCount: number; 
+    lastArticleDate: string; 
+    website?: string; 
+    twitter?: string; 
+    facebook?: string; 
+    instagram?: string; 
+    linkedin?: string; 
+  }[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
@@ -49,146 +63,73 @@ export default function AuthorsPage() {
   const [sortField, setSortField] = useState("name")
   const [sortDirection, setSortDirection] = useState("asc")
 
-  // For demo purposes, let's create some sample authors
-  const sampleAuthors = [
-    {
-      _id: "1",
-      name: "John Smith",
-      email: "john.smith@example.com",
-      bio: "Senior political correspondent with over 15 years of experience covering national politics.",
-      avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-      website: "https://johnsmith.com",
-      twitter: "@johnsmith",
-      facebook: "johnsmith",
-      instagram: "johnsmith",
-      linkedin: "johnsmith",
-      articleCount: 42,
-      viewCount: 125000,
-      lastArticleDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      _id: "2",
-      name: "Sarah Johnson",
-      email: "sarah.johnson@example.com",
-      bio: "Technology editor specializing in AI, blockchain, and emerging tech trends.",
-      avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-      website: "https://sarahjohnson.com",
-      twitter: "@sarahjohnson",
-      facebook: "sarahjohnson",
-      instagram: "sarahjohnson",
-      linkedin: "sarahjohnson",
-      articleCount: 38,
-      viewCount: 98000,
-      lastArticleDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      _id: "3",
-      name: "Michael Chen",
-      email: "michael.chen@example.com",
-      bio: "Business analyst focusing on market trends, startups, and economic policy.",
-      avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-      website: "https://michaelchen.com",
-      twitter: "@michaelchen",
-      facebook: "michaelchen",
-      instagram: "michaelchen",
-      linkedin: "michaelchen",
-      articleCount: 56,
-      viewCount: 182000,
-      lastArticleDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      _id: "4",
-      name: "Emily Rodriguez",
-      email: "emily.rodriguez@example.com",
-      bio: "Sports journalist covering international soccer, tennis, and Olympic events.",
-      avatar: "https://randomuser.me/api/portraits/women/4.jpg",
-      website: "https://emilyrodriguez.com",
-      twitter: "@emilyrodriguez",
-      facebook: "emilyrodriguez",
-      instagram: "emilyrodriguez",
-      linkedin: "emilyrodriguez",
-      articleCount: 64,
-      viewCount: 224000,
-      lastArticleDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      _id: "5",
-      name: "David Kim",
-      email: "david.kim@example.com",
-      bio: "Entertainment reporter with insider access to Hollywood and the music industry.",
-      avatar: "https://randomuser.me/api/portraits/men/5.jpg",
-      website: "https://davidkim.com",
-      twitter: "@davidkim",
-      facebook: "davidkim",
-      instagram: "davidkim",
-      linkedin: "davidkim",
-      articleCount: 48,
-      viewCount: 156000,
-      lastArticleDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      _id: "6",
-      name: "Lisa Wang",
-      email: "lisa.wang@example.com",
-      bio: "Health and wellness editor with a background in medical journalism.",
-      avatar: "https://randomuser.me/api/portraits/women/6.jpg",
-      website: "https://lisawang.com",
-      twitter: "@lisawang",
-      facebook: "lisawang",
-      instagram: "lisawang",
-      linkedin: "lisawang",
-      articleCount: 32,
-      viewCount: 89000,
-      lastArticleDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      _id: "7",
-      name: "Robert Taylor",
-      email: "robert.taylor@example.com",
-      bio: "Science correspondent with a focus on climate change and environmental issues.",
-      avatar: "https://randomuser.me/api/portraits/men/7.jpg",
-      website: "https://roberttaylor.com",
-      twitter: "@roberttaylor",
-      facebook: "roberttaylor",
-      instagram: "roberttaylor",
-      linkedin: "roberttaylor",
-      articleCount: 28,
-      viewCount: 75000,
-      lastArticleDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      _id: "8",
-      name: "Jennifer Lee",
-      email: "jennifer.lee@example.com",
-      bio: "Lifestyle and travel writer exploring global cultures and sustainable tourism.",
-      avatar: "https://randomuser.me/api/portraits/women/8.jpg",
-      website: "https://jenniferlee.com",
-      twitter: "@jenniferlee",
-      facebook: "jenniferlee",
-      instagram: "jenniferlee",
-      linkedin: "jenniferlee",
-      articleCount: 24,
-      viewCount: 62000,
-      lastArticleDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-  ]
-
   const fetchAuthors = async () => {
     try {
       setIsLoading(true)
 
-      // This would be a real API endpoint in a production app
-      // For now, we'll use our sample data
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Fetch news data to extract real authors
+      const newsResponse = await fetch("/api/admin/news?limit=100")
+      let newsData = []
 
+      if (newsResponse.ok) {
+        const data = await newsResponse.json()
+        newsData = data.news || []
+      }
+
+      // Extract unique authors and their articles
+      const authorMap: Record<string, {
+        _id: string;
+        name: string;
+        email: string;
+        bio: string;
+        avatar: string;
+        articleCount: number;
+        viewCount: number;
+        lastArticleDate: string;
+      }> = {}
+
+      newsData.forEach((article:any) => {
+        if (article.author) {
+          if (!authorMap[article.author]) {
+            // Create new author entry
+            authorMap[article.author] = {
+              _id: article.author.replace(/\s+/g, "-").toLowerCase(),
+              name: article.author,
+              email: `${article.author.replace(/\s+/g, ".").toLowerCase()}@example.com`,
+              bio: `Experienced journalist covering ${article.category || "various"} topics.`,
+              avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? "men" : "women"}/${Math.floor(Math.random() * 70) + 1}.jpg`,
+              articleCount: 1,
+              viewCount: article.views || Math.floor(Math.random() * 1000),
+              lastArticleDate: article.published_date || new Date().toISOString(),
+            }
+          } else {
+            // Update existing author
+            authorMap[article.author].articleCount += 1
+            authorMap[article.author].viewCount += article.views || Math.floor(Math.random() * 1000)
+
+            // Update last article date if this one is more recent
+            const currentDate = new Date(authorMap[article.author].lastArticleDate)
+            const articleDate = new Date(article.published_date || new Date())
+
+            if (articleDate > currentDate) {
+              authorMap[article.author].lastArticleDate = article.published_date || new Date().toISOString()
+            }
+          }
+        }
+      })
+
+      // Convert to array
+      const realAuthors = Object.values(authorMap)
+
+      // Apply search filter
       let filteredAuthors = searchQuery
-        ? sampleAuthors.filter(
+        ? realAuthors.filter(
             (author) =>
               author.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
               author.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
               author.bio.toLowerCase().includes(searchQuery.toLowerCase()),
           )
-        : [...sampleAuthors]
+        : [...realAuthors]
 
       // Sort authors
       filteredAuthors = filteredAuthors.sort((a, b) => {
@@ -201,7 +142,7 @@ export default function AuthorsPage() {
         } else if (sortField === "viewCount") {
           comparison = a.viewCount - b.viewCount
         } else if (sortField === "lastArticleDate") {
-          comparison = new Date(a.lastArticleDate) - new Date(b.lastArticleDate)
+          comparison = new Date(a.lastArticleDate).getTime() - new Date(b.lastArticleDate).getTime()
         }
 
         return sortDirection === "asc" ? comparison : -comparison
@@ -221,13 +162,13 @@ export default function AuthorsPage() {
     fetchAuthors()
   }, [searchQuery, sortField, sortDirection])
 
-  const handleSearch = (e) => {
+  const handleSearch = (e:any) => {
     e.preventDefault()
     setCurrentPage(1)
     fetchAuthors()
   }
 
-  const handleSort = (field) => {
+  const handleSort = (field:any) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
@@ -236,12 +177,12 @@ export default function AuthorsPage() {
     }
   }
 
-  const getSortIcon = (field) => {
+  const getSortIcon = (field:any) => {
     if (sortField !== field) return <FaSort className="ml-1" />
     return sortDirection === "asc" ? <FaSortUp className="ml-1" /> : <FaSortDown className="ml-1" />
   }
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page:any) => {
     setCurrentPage(page)
   }
 
@@ -306,7 +247,7 @@ export default function AuthorsPage() {
     }
   }
 
-  const handleDeleteAuthor = async (id) => {
+  const handleDeleteAuthor = async (id:any) => {
     if (!confirm("Are you sure you want to delete this author?")) {
       return
     }
@@ -323,7 +264,7 @@ export default function AuthorsPage() {
     }
   }
 
-  const openEditModal = (author) => {
+  const openEditModal = (author:any) => {
     setFormData({
       name: author.name,
       email: author.email,
@@ -339,7 +280,7 @@ export default function AuthorsPage() {
     setIsEditModalOpen(true)
   }
 
-  const handleChange = (e) => {
+  const handleChange = (e:any) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }

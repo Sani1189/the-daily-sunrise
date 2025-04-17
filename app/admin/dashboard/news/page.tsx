@@ -22,8 +22,19 @@ import {
 } from "react-icons/fa"
 import { toast } from "react-hot-toast"
 
+type NewsArticle = {
+  _id: string
+  title: string
+  author: string
+  category: string
+  published_date: string
+  image_url?: string
+  country: string
+  tags: string[]
+}
+
 export default function NewsManagement() {
-  const [news, setNews] = useState([])
+  const [news, setNews] = useState<NewsArticle[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
@@ -39,10 +50,10 @@ export default function NewsManagement() {
   const [sortBy, setSortBy] = useState("published_date")
   const [sortOrder, setSortOrder] = useState("desc")
   const [showSortOptions, setShowSortOptions] = useState(false)
-  const [categories, setCategories] = useState([])
-  const [countries, setCountries] = useState([])
-  const [authors, setAuthors] = useState([])
-  const [tags, setTags] = useState([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [countries, setCountries] = useState<string[]>([])
+  const [authors, setAuthors] = useState<string[]>([])
+  const [tags, setTags] = useState<string[]>([])
   const router = useRouter()
 
   const fetchNews = async () => {
@@ -88,10 +99,10 @@ export default function NewsManagement() {
         setTotalNews(data.pagination.total)
 
         // Extract unique values for filters
-        const uniqueCategories = [...new Set(data.news.map((item) => item.category))]
-        const uniqueCountries = [...new Set(data.news.map((item) => item.country))]
-        const uniqueAuthors = [...new Set(data.news.map((item) => item.author))]
-        const uniqueTags = [...new Set(data.news.flatMap((item) => item.tags))]
+        const uniqueCategories: string[] = [...new Set((data.news as NewsArticle[]).map((item) => item.category))]
+        const uniqueCountries: string[] = [...new Set((data.news as NewsArticle[]).map((item: NewsArticle) => item.country))]
+        const uniqueAuthors: string[] = [...new Set((data.news as NewsArticle[]).map((item: NewsArticle) => item.author))]
+        const uniqueTags: string[] = [...new Set((data.news as NewsArticle[]).flatMap((item: NewsArticle) => item.tags))]
 
         setCategories(uniqueCategories)
         setCountries(uniqueCountries)
@@ -112,7 +123,7 @@ export default function NewsManagement() {
     fetchNews()
   }, [currentPage, sortBy, sortOrder])
 
-  const handleSearch = (e) => {
+  const handleSearch = (e:any) => {
     e.preventDefault()
     setCurrentPage(1)
     fetchNews()
@@ -134,7 +145,7 @@ export default function NewsManagement() {
     fetchNews()
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id:any) => {
     if (!confirm("Are you sure you want to delete this article?")) {
       return
     }
@@ -156,11 +167,11 @@ export default function NewsManagement() {
     }
   }
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page:any) => {
     setCurrentPage(page)
   }
 
-  const handleSortChange = (newSortBy) => {
+  const handleSortChange = (newSortBy:any) => {
     if (sortBy === newSortBy) {
       // Toggle sort order if clicking the same column
       setSortOrder(sortOrder === "asc" ? "desc" : "asc")
