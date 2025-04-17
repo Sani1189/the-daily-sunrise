@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { FaSearch, FaFilter, FaTrash, FaSort, FaChevronLeft, FaChevronRight } from "react-icons/fa"
+import { FaSearch, FaFilter, FaTrash, FaSort, FaChevronLeft, FaChevronRight, FaEye } from "react-icons/fa"
 import { toast } from "react-hot-toast"
 import Link from "next/link"
 
@@ -14,6 +14,10 @@ export default function CommentsManagement() {
   const [totalPages, setTotalPages] = useState(1)
   const [showFilters, setShowFilters] = useState(false)
   const [sortOrder, setSortOrder] = useState("newest")
+  const [selectedNewsId, setSelectedNewsId] = useState("")
+  const [dateRange, setDateRange] = useState({ start: "", end: "" })
+  const [showSortOptions, setShowSortOptions] = useState(false)
+  const [newsOptions, setNewsOptions] = useState([])
 
   const fetchComments = async () => {
     try {
@@ -23,6 +27,14 @@ export default function CommentsManagement() {
 
       if (searchQuery) {
         url += `&search=${encodeURIComponent(searchQuery)}`
+      }
+
+      if (selectedNewsId) {
+        url += `&newsId=${selectedNewsId}`
+      }
+
+      if (dateRange.start && dateRange.end) {
+        url += `&startDate=${dateRange.start}&endDate=${dateRange.end}`
       }
 
       const response = await fetch(url)
@@ -42,8 +54,21 @@ export default function CommentsManagement() {
     }
   }
 
+  const fetchNewsOptions = async () => {
+    try {
+      const response = await fetch("/api/admin/news?limit=100")
+      if (response.ok) {
+        const data = await response.json()
+        setNewsOptions(data.news)
+      }
+    } catch (error) {
+      console.error("Error fetching news options:", error)
+    }
+  }
+
   useEffect(() => {
     fetchComments()
+    fetchNewsOptions()
   }, [currentPage])
 
   const handleSearch = (e) => {
@@ -76,6 +101,18 @@ export default function CommentsManagement() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page)
+  }
+
+  const handleFilterApply = () => {
+    setCurrentPage(1)
+    fetchComments()
+  }
+
+  const handleFilterReset = () => {
+    setSelectedNewsId("")
+    setDateRange({ start: "", end: "" })
+    setCurrentPage(1)
+    fetchComments()
   }
 
   const sortComments = () => {
@@ -122,6 +159,9 @@ export default function CommentsManagement() {
     <motion.div className="space-y-6" variants={containerVariants} initial="hidden" animate="visible">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Comments Management</h1>
+        <div className="text-sm text-muted-foreground">
+          Total: {comments.length > 0 ? comments.length : "Loading..."}
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -133,7 +173,7 @@ export default function CommentsManagement() {
             </div>
             <input
               type="text"
-              placeholder="Search comments..."
+              placeholder="Search by name, email or comment content..."
               className="pl-10 w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -161,42 +201,57 @@ export default function CommentsManagement() {
               <button
                 type="button"
                 className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-2"
+                onClick={() => setShowSortOptions(!showSortOptions)}
               >
                 <FaSort />
                 <span>Sort</span>
               </button>
-              <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border z-10 hidden group-hover:block">
-                <div className="py-1">
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
-                    onClick={() => setSortOrder("newest")}
-                  >
-                    Newest First
-                  </button>
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
-                    onClick={() => setSortOrder("oldest")}
-                  >
-                    Oldest First
-                  </button>
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
-                    onClick={() => setSortOrder("name-asc")}
-                  >
-                    Name (A-Z)
-                  </button>
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
-                    onClick={() => setSortOrder("name-desc")}
-                  >
-                    Name (Z-A)
-                  </button>
+              {showSortOptions && (
+                <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border z-10">
+                  <div className="py-1">
+                    <button
+                      type="button"
+                      className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
+                      onClick={() => {
+                        setSortOrder("newest")
+                        setShowSortOptions(false)
+                      }}
+                    >
+                      Newest First
+                    </button>
+                    <button
+                      type="button"
+                      className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
+                      onClick={() => {
+                        setSortOrder("oldest")
+                        setShowSortOptions(false)
+                      }}
+                    >
+                      Oldest First
+                    </button>
+                    <button
+                      type="button"
+                      className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
+                      onClick={() => {
+                        setSortOrder("name-asc")
+                        setShowSortOptions(false)
+                      }}
+                    >
+                      Name (A-Z)
+                    </button>
+                    <button
+                      type="button"
+                      className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
+                      onClick={() => {
+                        setSortOrder("name-desc")
+                        setShowSortOptions(false)
+                      }}
+                    >
+                      Name (Z-A)
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </form>
@@ -204,17 +259,52 @@ export default function CommentsManagement() {
         {showFilters && (
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Article</label>
+              <select
+                className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                value={selectedNewsId}
+                onChange={(e) => setSelectedNewsId(e.target.value)}
+              >
+                <option value="">All Articles</option>
+                {newsOptions.map((news) => (
+                  <option key={news._id} value={news._id}>
+                    {news.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-foreground mb-1">Date Range</label>
               <div className="flex gap-2">
                 <input
                   type="date"
                   className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
                 />
                 <input
                   type="date"
                   className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                 />
               </div>
+            </div>
+            <div className="sm:col-span-2 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={handleFilterReset}
+                className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
+              >
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={handleFilterApply}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Apply Filters
+              </button>
             </div>
           </div>
         )}
@@ -232,6 +322,7 @@ export default function CommentsManagement() {
         ) : comments.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64">
             <p className="text-xl text-muted-foreground mb-4">No comments found</p>
+            <p className="text-muted-foreground">Try adjusting your search or filters</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -270,20 +361,37 @@ export default function CommentsManagement() {
                       <div className="text-sm text-foreground line-clamp-2">{comment.comment}</div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <Link href={`/admin/dashboard/news/edit/${comment.newsId}`}>
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary/10 text-primary">
-                          {comment.newsId?.title || comment.newsId}
+                      {comment.newsId && typeof comment.newsId === "object" ? (
+                        <Link
+                          href={`/${comment.newsId.category}/${comment.newsId._id}`}
+                          className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary/10 text-primary"
+                        >
+                          {comment.newsId.title}
+                        </Link>
+                      ) : (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-muted text-muted-foreground">
+                          Unknown Article
                         </span>
-                      </Link>
+                      )}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-foreground">
                       {new Date(comment.date).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
+                        {comment.newsId && typeof comment.newsId === "object" && (
+                          <Link
+                            href={`/${comment.newsId.category}/${comment.newsId._id}`}
+                            className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                            title="View Article"
+                          >
+                            <FaEye size={16} />
+                          </Link>
+                        )}
                         <button
                           onClick={() => handleDelete(comment._id)}
                           className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                          title="Delete Comment"
                         >
                           <FaTrash size={16} />
                         </button>

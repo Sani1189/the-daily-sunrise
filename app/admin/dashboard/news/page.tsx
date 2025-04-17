@@ -14,6 +14,11 @@ import {
   FaSort,
   FaChevronLeft,
   FaChevronRight,
+  FaTimes,
+  FaCalendarAlt,
+  FaTag,
+  FaGlobe,
+  FaUser,
 } from "react-icons/fa"
 import { toast } from "react-hot-toast"
 
@@ -23,17 +28,28 @@ export default function NewsManagement() {
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [totalNews, setTotalNews] = useState(0)
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedCountry, setSelectedCountry] = useState("")
+  const [selectedAuthor, setSelectedAuthor] = useState("")
+  const [selectedTag, setSelectedTag] = useState("")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [showFilters, setShowFilters] = useState(false)
-  const [sortOrder, setSortOrder] = useState("newest")
+  const [sortBy, setSortBy] = useState("published_date")
+  const [sortOrder, setSortOrder] = useState("desc")
+  const [showSortOptions, setShowSortOptions] = useState(false)
+  const [categories, setCategories] = useState([])
+  const [countries, setCountries] = useState([])
+  const [authors, setAuthors] = useState([])
+  const [tags, setTags] = useState([])
   const router = useRouter()
 
   const fetchNews = async () => {
     try {
       setIsLoading(true)
 
-      let url = `/api/admin/news?page=${currentPage}&limit=10`
+      let url = `/api/admin/news?page=${currentPage}&limit=10&sortBy=${sortBy}&sortOrder=${sortOrder}`
 
       if (searchQuery) {
         url += `&search=${encodeURIComponent(searchQuery)}`
@@ -47,12 +63,40 @@ export default function NewsManagement() {
         url += `&country=${encodeURIComponent(selectedCountry)}`
       }
 
+      if (selectedAuthor) {
+        url += `&author=${encodeURIComponent(selectedAuthor)}`
+      }
+
+      if (selectedTag) {
+        url += `&tag=${encodeURIComponent(selectedTag)}`
+      }
+
+      if (startDate) {
+        url += `&startDate=${encodeURIComponent(startDate)}`
+      }
+
+      if (endDate) {
+        url += `&endDate=${encodeURIComponent(endDate)}`
+      }
+
       const response = await fetch(url)
 
       if (response.ok) {
         const data = await response.json()
         setNews(data.news)
         setTotalPages(data.pagination.pages)
+        setTotalNews(data.pagination.total)
+
+        // Extract unique values for filters
+        const uniqueCategories = [...new Set(data.news.map((item) => item.category))]
+        const uniqueCountries = [...new Set(data.news.map((item) => item.country))]
+        const uniqueAuthors = [...new Set(data.news.map((item) => item.author))]
+        const uniqueTags = [...new Set(data.news.flatMap((item) => item.tags))]
+
+        setCategories(uniqueCategories)
+        setCountries(uniqueCountries)
+        setAuthors(uniqueAuthors)
+        setTags(uniqueTags)
       } else {
         throw new Error("Failed to fetch news")
       }
@@ -66,10 +110,26 @@ export default function NewsManagement() {
 
   useEffect(() => {
     fetchNews()
-  }, [currentPage, selectedCategory, selectedCountry])
+  }, [currentPage, sortBy, sortOrder])
 
   const handleSearch = (e) => {
     e.preventDefault()
+    setCurrentPage(1)
+    fetchNews()
+  }
+
+  const handleFilterApply = () => {
+    setCurrentPage(1)
+    fetchNews()
+  }
+
+  const handleFilterReset = () => {
+    setSelectedCategory("")
+    setSelectedCountry("")
+    setSelectedAuthor("")
+    setSelectedTag("")
+    setStartDate("")
+    setEndDate("")
     setCurrentPage(1)
     fetchNews()
   }
@@ -100,25 +160,17 @@ export default function NewsManagement() {
     setCurrentPage(page)
   }
 
-  const sortNews = () => {
-    const sortedNews = [...news]
-
-    if (sortOrder === "newest") {
-      return sortedNews.sort((a, b) => new Date(b.published_date) - new Date(a.published_date))
-    } else if (sortOrder === "oldest") {
-      return sortedNews.sort((a, b) => new Date(a.published_date) - new Date(b.published_date))
-    } else if (sortOrder === "title-asc") {
-      return sortedNews.sort((a, b) => a.title.localeCompare(b.title))
-    } else if (sortOrder === "title-desc") {
-      return sortedNews.sort((a, b) => b.title.localeCompare(a.title))
+  const handleSortChange = (newSortBy) => {
+    if (sortBy === newSortBy) {
+      // Toggle sort order if clicking the same column
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      // Default to descending for new column
+      setSortBy(newSortBy)
+      setSortOrder("desc")
     }
-
-    return sortedNews
+    setShowSortOptions(false)
   }
-
-  // Get unique categories and countries for filters
-  const categories = [...new Set(news.map((item) => item.category))]
-  const countries = [...new Set(news.map((item) => item.country))]
 
   // Animation variants
   const containerVariants = {
@@ -198,78 +250,167 @@ export default function NewsManagement() {
               <button
                 type="button"
                 className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-2"
+                onClick={() => setShowSortOptions(!showSortOptions)}
               >
                 <FaSort />
                 <span>Sort</span>
               </button>
-              <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border z-10 hidden group-hover:block">
-                <div className="py-1">
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
-                    onClick={() => setSortOrder("newest")}
-                  >
-                    Newest First
-                  </button>
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
-                    onClick={() => setSortOrder("oldest")}
-                  >
-                    Oldest First
-                  </button>
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
-                    onClick={() => setSortOrder("title-asc")}
-                  >
-                    Title (A-Z)
-                  </button>
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary/10"
-                    onClick={() => setSortOrder("title-desc")}
-                  >
-                    Title (Z-A)
-                  </button>
+              {showSortOptions && (
+                <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border z-10">
+                  <div className="py-1">
+                    <button
+                      type="button"
+                      className={`block w-full text-left px-4 py-2 text-sm ${sortBy === "published_date" ? "bg-primary/10 text-primary" : "text-foreground hover:bg-primary/10"}`}
+                      onClick={() => handleSortChange("published_date")}
+                    >
+                      Date {sortBy === "published_date" && (sortOrder === "desc" ? "↓" : "↑")}
+                    </button>
+                    <button
+                      type="button"
+                      className={`block w-full text-left px-4 py-2 text-sm ${sortBy === "title" ? "bg-primary/10 text-primary" : "text-foreground hover:bg-primary/10"}`}
+                      onClick={() => handleSortChange("title")}
+                    >
+                      Title {sortBy === "title" && (sortOrder === "desc" ? "↓" : "↑")}
+                    </button>
+                    <button
+                      type="button"
+                      className={`block w-full text-left px-4 py-2 text-sm ${sortBy === "author" ? "bg-primary/10 text-primary" : "text-foreground hover:bg-primary/10"}`}
+                      onClick={() => handleSortChange("author")}
+                    >
+                      Author {sortBy === "author" && (sortOrder === "desc" ? "↓" : "↑")}
+                    </button>
+                    <button
+                      type="button"
+                      className={`block w-full text-left px-4 py-2 text-sm ${sortBy === "category" ? "bg-primary/10 text-primary" : "text-foreground hover:bg-primary/10"}`}
+                      onClick={() => handleSortChange("category")}
+                    >
+                      Category {sortBy === "category" && (sortOrder === "desc" ? "↓" : "↑")}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </form>
 
         {showFilters && (
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Category</label>
-              <select
-                className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </option>
-                ))}
-              </select>
+          <div className="mt-4 border-t border-border pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  <FaTag className="inline mr-1" /> Category
+                </label>
+                <select
+                  className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  <FaGlobe className="inline mr-1" /> Country
+                </label>
+                <select
+                  className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                  value={selectedCountry}
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                >
+                  <option value="">All Countries</option>
+                  {countries.map((country) => (
+                    <option key={country} value={country}>
+                      {country.charAt(0).toUpperCase() + country.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  <FaUser className="inline mr-1" /> Author
+                </label>
+                <select
+                  className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                  value={selectedAuthor}
+                  onChange={(e) => setSelectedAuthor(e.target.value)}
+                >
+                  <option value="">All Authors</option>
+                  {authors.map((author) => (
+                    <option key={author} value={author}>
+                      {author}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  <FaTag className="inline mr-1" /> Tag
+                </label>
+                <select
+                  className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                  value={selectedTag}
+                  onChange={(e) => setSelectedTag(e.target.value)}
+                >
+                  <option value="">All Tags</option>
+                  {tags.map((tag) => (
+                    <option key={tag} value={tag}>
+                      {tag}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Country</label>
-              <select
-                className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  <FaCalendarAlt className="inline mr-1" /> Start Date
+                </label>
+                <input
+                  type="date"
+                  className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  <FaCalendarAlt className="inline mr-1" /> End Date
+                </label>
+                <input
+                  type="date"
+                  className="w-full p-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={handleFilterReset}
+                className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-2"
               >
-                <option value="">All Countries</option>
-                {countries.map((country) => (
-                  <option key={country} value={country}>
-                    {country.charAt(0).toUpperCase() + country.slice(1)}
-                  </option>
-                ))}
-              </select>
+                <FaTimes />
+                <span>Reset</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleFilterApply}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Apply Filters
+              </button>
             </div>
           </div>
         )}
@@ -316,7 +457,7 @@ export default function NewsManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {sortNews().map((article) => (
+                {news.map((article) => (
                   <tr key={article._id} className="hover:bg-muted/50 transition-colors">
                     <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -393,8 +534,8 @@ export default function NewsManagement() {
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">
-                  Showing page <span className="font-medium">{currentPage}</span> of{" "}
-                  <span className="font-medium">{totalPages}</span>
+                  Showing <span className="font-medium">{news.length}</span> of{" "}
+                  <span className="font-medium">{totalNews}</span> articles
                 </p>
               </div>
               <div>

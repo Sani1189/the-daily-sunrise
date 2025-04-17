@@ -1,8 +1,10 @@
 import connectMongoDB from "@/libs/DBconnect"
 import News from "@/models/news"
+import Notification from "@/models/notification"
 import { NextResponse } from "next/server"
+import { getAdminFromToken } from "@/libs/auth"
 
-// Get all news with pagination
+// Get all news with pagination and advanced filtering
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url)
@@ -10,7 +12,13 @@ export async function GET(req) {
     const limit = Number.parseInt(searchParams.get("limit")) || 10
     const category = searchParams.get("category")
     const country = searchParams.get("country")
+    const author = searchParams.get("author")
+    const tag = searchParams.get("tag")
     const searchQuery = searchParams.get("search")
+    const sortBy = searchParams.get("sortBy") || "published_date"
+    const sortOrder = searchParams.get("sortOrder") || "desc"
+    const startDate = searchParams.get("startDate")
+    const endDate = searchParams.get("endDate")
 
     const skip = (page - 1) * limit
 
@@ -26,6 +34,14 @@ export async function GET(req) {
       query.country = country
     }
 
+    if (author) {
+      query.author = author
+    }
+
+    if (tag) {
+      query.tags = tag
+    }
+
     if (searchQuery) {
       query.$or = [
         { title: { $regex: searchQuery, $options: "i" } },
@@ -34,8 +50,27 @@ export async function GET(req) {
       ]
     }
 
+    // Date range filtering
+    if (startDate || endDate) {
+      query.published_date = {}
+
+      if (startDate) {
+        query.published_date.$gte = new Date(startDate)
+      }
+
+      if (endDate) {
+        const endDateObj = new Date(endDate)
+        endDateObj.setHours(23, 59, 59, 999) // Set to end of day
+        query.published_date.$lte = endDateObj
+      }
+    }
+
+    // Prepare sort options
+    const sortOptions = {}
+    sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1
+
     const totalNews = await News.countDocuments(query)
-    const news = await News.find(query).sort({ published_date: -1 }).skip(skip).limit(limit)
+    const news = await News.find(query).sort(sortOptions).skip(skip).limit(limit)
 
     return NextResponse.json(
       {
@@ -58,6 +93,7 @@ export async function GET(req) {
 // Create a new news article
 export async function POST(req) {
   try {
+    const admin = await getAdminFromToken(req)
     const newsData = await req.json()
 
     await connectMongoDB()
@@ -74,6 +110,16 @@ export async function POST(req) {
     const newNews = await News.create({
       ...newsData,
       id: newId,
+    })
+
+    // Create notification
+    await Notification.create({
+      type: "news_created",
+      title: "New Article Published",
+      message: `A new article "${newNews.title}" has been published.`,
+      entityId: newNews._id,
+      entityType: "news",
+      createdBy: admin?.id,
     })
 
     return NextResponse.json({ message: "News created successfully", news: newNews }, { status: 201 })
