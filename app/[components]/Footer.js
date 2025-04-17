@@ -1,7 +1,17 @@
 "use client"
 
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa"
+import {
+  FaFacebook,
+  FaTwitter,
+  FaInstagram,
+  FaLinkedin,
+  FaEnvelope,
+  FaPhone,
+  FaMapMarkerAlt,
+  FaLock,
+} from "react-icons/fa"
 import { motion } from "framer-motion"
+import Link from "next/link"
 
 const Footer = () => {
   const containerVariants = {
@@ -146,9 +156,12 @@ const Footer = () => {
                 </a>
               </motion.li>
               <motion.li whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
-                <a href="/support" className="hover:text-primary transition-colors duration-300 flex items-center">
-                  <span className="mr-2">›</span> Support
-                </a>
+                <Link
+                  href="/admin/login"
+                  className="hover:text-primary transition-colors duration-300 flex items-center"
+                >
+                  <FaLock className="mr-2 text-primary" /> Admin Portal
+                </Link>
               </motion.li>
             </ul>
           </motion.div>
