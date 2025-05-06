@@ -178,7 +178,7 @@ const Footer = () => {
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
                 <FaMapMarkerAlt className="mt-1 mr-3 text-primary" />
-                <span>123 News Street, Cityville, Country, 12345</span>
+                <span>123 News Street, Dhaka, Bangladesh</span>
               </motion.li>
               <motion.li
                 className="flex items-center"
